@@ -1,7 +1,7 @@
 COMPOSE_DEV := docker compose -f docker-compose.yml -f docker-compose.dev.yml
 SVC         := backend
 
-.PHONY: help dev down logs shell lock build
+.PHONY: help dev down logs shell lock build test migrate upgrade downgrade
 
 help:
 	@echo ""
@@ -38,6 +38,9 @@ lock:
 
 build:
 	$(COMPOSE_DEV) build $(SVC)
+
+test:
+	$(COMPOSE_DEV) exec $(SVC) pytest -v
 
 migrate:
 ifndef m
