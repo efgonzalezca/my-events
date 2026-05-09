@@ -14,3 +14,8 @@ class RegistrationRepository(Protocol):
         Raises EventNotFound, NotPublished, EventFull or AlreadyRegistered.
         """
         ...
+
+    def cancel(self, user_id: int, event_id: int) -> None:
+        """Remove the user's registration and decrement events.registered_count
+        guarded against negatives. Raises RegistrationNotFound if missing."""
+        ...

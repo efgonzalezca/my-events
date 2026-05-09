@@ -1,6 +1,6 @@
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.modules.events.domain.exceptions import EventNotFound
 from app.modules.events.domain.value_objects import EventStatus
@@ -10,6 +10,7 @@ from app.modules.registrations.domain.exceptions import (
     AlreadyRegistered,
     EventFull,
     NotPublished,
+    RegistrationNotFound,
 )
 from app.modules.registrations.domain.repositories import RegistrationRepository
 from app.modules.registrations.infrastructure.mappers import to_domain
@@ -50,3 +51,24 @@ class SqlRegistrationRepository(RegistrationRepository):
 
         self._s.refresh(reg)
         return to_domain(reg)
+
+    def cancel(self, user_id: int, event_id: int) -> None:
+        reg = self._s.exec(
+            select(RegistrationORM).where(
+                RegistrationORM.user_id == user_id,
+                RegistrationORM.event_id == event_id,
+            )
+        ).first()
+        if reg is None:
+            raise RegistrationNotFound(f"{user_id}:{event_id}")
+
+        self._s.delete(reg)
+        self._s.execute(
+            update(EventORM)
+            .where(
+                EventORM.id == event_id,
+                EventORM.registered_count > 0,
+            )
+            .values(registered_count=EventORM.registered_count - 1)
+        )
+        self._s.commit()

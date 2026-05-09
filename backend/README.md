@@ -158,6 +158,7 @@ When adding a new module with persistent state, import its ORM model in
 | POST   | `/api/sessions/{sid}/speakers/{spid}` | Bearer (organizer/admin) | Link speaker to session; 404 if speaker missing, 409 if already linked |
 | DELETE | `/api/sessions/{sid}/speakers/{spid}` | Bearer (organizer/admin) | Unlink speaker from session; 204; 404 if not linked                  |
 | POST   | `/api/events/{id}/register` | Bearer                | Register the authenticated user; 409 on `NOT_PUBLISHED`/`EVENT_FULL`/`ALREADY_REGISTERED` |
+| DELETE | `/api/events/{id}/register` | Bearer                | Cancel the authenticated user's registration; 204; 404 `REGISTRATION_NOT_FOUND` if absent |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

@@ -17,3 +17,9 @@ def register_to_event(
     user_id: int, event_id: int, repo: RegistrationRepository
 ) -> RegistrationDTO:
     return to_dto(repo.try_register(user_id, event_id))
+
+
+def cancel_registration(
+    user_id: int, event_id: int, repo: RegistrationRepository
+) -> None:
+    repo.cancel(user_id, event_id)
