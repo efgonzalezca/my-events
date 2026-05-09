@@ -40,10 +40,15 @@ backend/
 │   │   │   ├── application/             # use cases + DTOs
 │   │   │   ├── infrastructure/          # SQLModel ORM, mappers, SqlEventRepository
 │   │   │   └── interfaces/http/         # routes, schemas, FastAPI deps
-│   │   └── identity/
-│   │       ├── domain/                  # entities, value objects, repo Protocols, errors
+│   │   ├── identity/
+│   │   │   ├── domain/                  # entities, value objects, repo Protocols, errors
+│   │   │   ├── application/             # use cases + DTOs
+│   │   │   ├── infrastructure/          # SQLModel ORM, mappers, SqlUserRepository
+│   │   │   └── interfaces/http/         # routes, schemas, FastAPI deps
+│   │   └── speakers/
+│   │       ├── domain/                  # Speaker entity, repo Protocol
 │   │       ├── application/             # use cases + DTOs
-│   │       ├── infrastructure/          # SQLModel ORM, mappers, SqlUserRepository
+│   │       ├── infrastructure/          # SQLModel ORM, mappers, SqlSpeakerRepository
 │   │       └── interfaces/http/         # routes, schemas, FastAPI deps
 │   ├── shared/
 │   │   ├── application/ports/auth.py    # PasswordHasher / TokenService Protocols
@@ -130,6 +135,7 @@ When adding a new module with persistent state, import its ORM model in
 | POST   | `/api/events/{id}/publish` | Bearer (owner/admin) | Transition event to `published` (draft → published)     |
 | POST   | `/api/events/{id}/cancel`  | Bearer (owner/admin) | Transition event to `cancelled` (draft/published → cancelled) |
 | DELETE | `/api/events/{id}`         | Bearer (owner/admin) | Delete a draft or cancelled event; published returns 409      |
+| POST   | `/api/speakers`            | Bearer (organizer/admin) | Create a speaker                                          |
 
 Interactive docs: <http://localhost:8000/api/docs>
 
