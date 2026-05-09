@@ -15,6 +15,11 @@ help:
 	@echo "Backend (Python):"
 	@echo "  make test               - pytest -v"
 	@echo "  make lock               - regenerate poetry.lock"
+	@echo ""
+	@echo "Migrations (Alembic):"
+	@echo "  make migrate m=\"...\"    - new revision (autogenerate) + upgrade head"
+	@echo "  make upgrade            - alembic upgrade head"
+	@echo "  make downgrade          - alembic downgrade -1"
 
 dev:
 	$(COMPOSE_DEV) up --build
@@ -33,3 +38,16 @@ lock:
 
 build:
 	$(COMPOSE_DEV) build $(SVC)
+
+migrate:
+ifndef m
+	$(error usage: make migrate m="message")
+endif
+	$(COMPOSE_DEV) exec $(SVC) alembic revision --autogenerate -m "$(m)"
+	$(COMPOSE_DEV) exec $(SVC) alembic upgrade head
+
+upgrade:
+	$(COMPOSE_DEV) exec $(SVC) alembic upgrade head
+
+downgrade:
+	$(COMPOSE_DEV) exec $(SVC) alembic downgrade -1
