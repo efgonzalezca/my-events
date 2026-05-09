@@ -52,6 +52,14 @@ class SqlRegistrationRepository(RegistrationRepository):
         self._s.refresh(reg)
         return to_domain(reg)
 
+    def list_by_user(self, user_id: int) -> list[Registration]:
+        rows = self._s.exec(
+            select(RegistrationORM)
+            .where(RegistrationORM.user_id == user_id)
+            .order_by(RegistrationORM.created_at.desc())
+        ).all()
+        return [to_domain(r) for r in rows]
+
     def cancel(self, user_id: int, event_id: int) -> None:
         reg = self._s.exec(
             select(RegistrationORM).where(

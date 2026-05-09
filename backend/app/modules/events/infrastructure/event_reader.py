@@ -1,8 +1,13 @@
 from datetime import datetime, timezone
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
-from app.modules.events.application.ports import EventReader, EventScheduleReader
+from app.modules.events.application.ports import (
+    EventReader,
+    EventScheduleReader,
+    EventSummary,
+    EventSummaryReader,
+)
 from app.modules.events.domain.exceptions import EventNotFound
 from app.modules.events.infrastructure.orm import EventORM
 
@@ -28,3 +33,28 @@ class SqlEventReader(EventReader):
 
     def exists(self, event_id: int) -> bool:
         return self._s.get(EventORM, event_id) is not None
+
+
+class SqlEventSummaryReader(EventSummaryReader):
+    def __init__(self, session: Session) -> None:
+        self._s = session
+
+    def get_summaries(self, event_ids: list[int]) -> list[EventSummary]:
+        if not event_ids:
+            return []
+        rows = self._s.exec(
+            select(EventORM).where(EventORM.id.in_(event_ids))
+        ).all()
+        return [
+            EventSummary(
+                id=r.id,
+                name=r.name,
+                location=r.location,
+                starts_at=_as_utc(r.starts_at),
+                ends_at=_as_utc(r.ends_at),
+                capacity=r.capacity,
+                registered_count=r.registered_count,
+                status=r.status.value,
+            )
+            for r in rows
+        ]

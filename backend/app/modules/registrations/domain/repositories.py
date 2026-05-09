@@ -19,3 +19,7 @@ class RegistrationRepository(Protocol):
         """Remove the user's registration and decrement events.registered_count
         guarded against negatives. Raises RegistrationNotFound if missing."""
         ...
+
+    def list_by_user(self, user_id: int) -> list[Registration]:
+        """Return all registrations of the user, newest first."""
+        ...
