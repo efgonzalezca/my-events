@@ -21,3 +21,15 @@ class SessionRepository(Protocol):
     def delete(self, session_id: int) -> None:
         """Remove the session by id; raise SessionNotFound if it does not exist."""
         ...
+
+    def link_speaker(self, session_id: int, speaker_id: int) -> None:
+        """Add a (session, speaker) link; raise SessionNotFound or SpeakerAlreadyLinked."""
+        ...
+
+    def unlink_speaker(self, session_id: int, speaker_id: int) -> None:
+        """Remove a (session, speaker) link; raise SessionNotFound or SpeakerNotLinked."""
+        ...
+
+    def list_speaker_ids(self, session_id: int) -> list[int]:
+        """Return the ids of speakers linked to the session."""
+        ...

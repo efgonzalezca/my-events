@@ -13,6 +13,8 @@ from app.modules.sessions.domain.exceptions import (
 )
 from app.modules.sessions.domain.policies import SchedulePolicy
 from app.modules.sessions.domain.repositories import SessionRepository
+from app.modules.speakers.application.ports import SpeakerExistsReader
+from app.modules.speakers.domain.exceptions import SpeakerNotFound
 
 
 def to_dto(session: Session) -> SessionDTO:
@@ -105,3 +107,21 @@ def update_session(
 
 def delete_session(session_id: int, repo: SessionRepository) -> None:
     repo.delete(session_id)
+
+
+def link_speaker_to_session(
+    session_id: int,
+    speaker_id: int,
+    repo: SessionRepository,
+    speaker_reader: SpeakerExistsReader,
+) -> SessionDTO:
+    if not speaker_reader.exists(speaker_id):
+        raise SpeakerNotFound(str(speaker_id))
+    repo.link_speaker(session_id, speaker_id)
+    return to_dto(repo.get(session_id))
+
+
+def unlink_speaker_from_session(
+    session_id: int, speaker_id: int, repo: SessionRepository
+) -> None:
+    repo.unlink_speaker(session_id, speaker_id)

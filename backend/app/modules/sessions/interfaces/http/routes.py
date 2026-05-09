@@ -15,7 +15,9 @@ from app.modules.sessions.application.use_cases import (
     create_session,
     delete_session,
     get_session,
+    link_speaker_to_session,
     list_sessions_of_event,
+    unlink_speaker_from_session,
     update_session,
 )
 from app.modules.sessions.interfaces.http.deps import SessionRepoDep
@@ -24,6 +26,7 @@ from app.modules.sessions.interfaces.http.schemas import (
     SessionResponse,
     SessionUpdateRequest,
 )
+from app.modules.speakers.interfaces.http.deps import SpeakerExistsReaderDep
 
 router = APIRouter()
 
@@ -99,3 +102,32 @@ def delete_session_route(
     _me: UserDTO = require_role(UserRole.organizer, UserRole.admin),
 ) -> None:
     delete_session(session_id, repo=repo)
+
+
+@router.post(
+    "/sessions/{session_id}/speakers/{speaker_id}",
+    response_model=SessionResponse,
+)
+def link_speaker_route(
+    session_id: int,
+    speaker_id: int,
+    repo: SessionRepoDep,
+    speaker_reader: SpeakerExistsReaderDep,
+    _me: UserDTO = require_role(UserRole.organizer, UserRole.admin),
+) -> SessionResponse:
+    dto = link_speaker_to_session(
+        session_id, speaker_id, repo=repo, speaker_reader=speaker_reader
+    )
+    return SessionResponse(**dto.__dict__)
+
+
+@router.delete(
+    "/sessions/{session_id}/speakers/{speaker_id}", status_code=204
+)
+def unlink_speaker_route(
+    session_id: int,
+    speaker_id: int,
+    repo: SessionRepoDep,
+    _me: UserDTO = require_role(UserRole.organizer, UserRole.admin),
+) -> None:
+    unlink_speaker_from_session(session_id, speaker_id, repo=repo)

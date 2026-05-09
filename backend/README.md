@@ -150,6 +150,8 @@ When adding a new module with persistent state, import its ORM model in
 | GET    | `/api/sessions/{id}`        | —                     | Session detail; 404 `SESSION_NOT_FOUND` if missing                              |
 | PATCH  | `/api/sessions/{id}`        | Bearer (organizer/admin) | Update session fields; revalidates fits_in and overlap if schedule changes   |
 | DELETE | `/api/sessions/{id}`        | Bearer (organizer/admin) | Delete a session; 204                                                        |
+| POST   | `/api/sessions/{sid}/speakers/{spid}` | Bearer (organizer/admin) | Link speaker to session; 404 if speaker missing, 409 if already linked |
+| DELETE | `/api/sessions/{sid}/speakers/{spid}` | Bearer (organizer/admin) | Unlink speaker from session; 204; 404 if not linked                  |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

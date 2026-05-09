@@ -11,3 +11,11 @@ class SessionOutOfEventRange(DomainError):
 
 class SessionScheduleConflict(DomainError):
     code = "SESSION_SCHEDULE_CONFLICT"
+
+
+class SpeakerAlreadyLinked(DomainError):
+    code = "SPEAKER_ALREADY_LINKED"
+
+
+class SpeakerNotLinked(DomainError):
+    code = "SPEAKER_NOT_LINKED"

@@ -13,3 +13,10 @@ class SessionORM(SQLModel, table=True):
     starts_at: datetime
     ends_at: datetime
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class SessionSpeakerLinkORM(SQLModel, table=True):
+    __tablename__ = "session_speaker_link"
+
+    session_id: int = Field(foreign_key="sessions.id", primary_key=True)
+    speaker_id: int = Field(foreign_key="speakers.id", primary_key=True)
