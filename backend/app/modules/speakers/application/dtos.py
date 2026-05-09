@@ -14,3 +14,11 @@ class SpeakerDTO:
     name: str
     bio: str
     photo_url: str
+
+
+@dataclass(frozen=True)
+class PaginatedSpeakersDTO:
+    items: list[SpeakerDTO]
+    page: int
+    size: int
+    total: int

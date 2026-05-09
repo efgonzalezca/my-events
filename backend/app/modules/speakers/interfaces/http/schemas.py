@@ -12,3 +12,10 @@ class SpeakerResponse(BaseModel):
     name: str
     bio: str
     photo_url: str
+
+
+class PaginatedSpeakersResponse(BaseModel):
+    items: list[SpeakerResponse]
+    page: int
+    size: int
+    total: int

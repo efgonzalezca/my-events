@@ -136,6 +136,8 @@ When adding a new module with persistent state, import its ORM model in
 | POST   | `/api/events/{id}/cancel`  | Bearer (owner/admin) | Transition event to `cancelled` (draft/published → cancelled) |
 | DELETE | `/api/events/{id}`         | Bearer (owner/admin) | Delete a draft or cancelled event; published returns 409      |
 | POST   | `/api/speakers`            | Bearer (organizer/admin) | Create a speaker                                          |
+| GET    | `/api/speakers`            | —                     | List speakers with pagination (`q`, `page`, `size`)              |
+| GET    | `/api/speakers/{id}`       | —                     | Speaker detail; 404 `SPEAKER_NOT_FOUND` if missing                |
 
 Interactive docs: <http://localhost:8000/api/docs>
 
