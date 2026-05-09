@@ -1,8 +1,12 @@
 services:
+  db:
+    ports:
+      - "5438:5432"
+
   backend:
     build:
       context: ./backend
       target: development
     volumes:
       - ./backend:/app
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
