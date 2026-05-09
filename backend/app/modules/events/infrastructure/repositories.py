@@ -45,3 +45,20 @@ class SqlEventRepository(EventRepository):
         if orm is None:
             raise EventNotFound(str(event_id))
         return to_domain(orm)
+
+    def update(self, event: Event) -> Event:
+        orm = self._s.get(EventORM, event.id)
+        if orm is None:
+            raise EventNotFound(str(event.id))
+        orm.name = event.name
+        orm.description = event.description
+        orm.location = event.location
+        orm.starts_at = event.schedule.start
+        orm.ends_at = event.schedule.end
+        orm.capacity = event.capacity
+        orm.registered_count = event.registered_count
+        orm.status = event.status
+        self._s.add(orm)
+        self._s.commit()
+        self._s.refresh(orm)
+        return to_domain(orm)

@@ -15,6 +15,16 @@ class CreateEventCmd:
 
 
 @dataclass(frozen=True)
+class UpdateEventCmd:
+    name: str | None = None
+    description: str | None = None
+    location: str | None = None
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+    capacity: int | None = None
+
+
+@dataclass(frozen=True)
 class EventDTO:
     id: int
     name: str

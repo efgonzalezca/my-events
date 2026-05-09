@@ -15,3 +15,7 @@ class EventNotModifiable(DomainError):
 
 class EventNotOwned(DomainError):
     code = "EVENT_NOT_OWNED"
+
+
+class CapacityBelowRegistered(DomainError):
+    code = "CAPACITY_BELOW_REGISTERED"

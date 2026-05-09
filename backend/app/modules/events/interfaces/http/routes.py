@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
-from app.interfaces.http.auth import require_role
-from app.modules.events.application.dtos import CreateEventCmd
+from app.interfaces.http.auth import get_current_user, require_role
+from app.modules.events.application.dtos import CreateEventCmd, UpdateEventCmd
 from app.modules.events.application.use_cases import (
     create_event,
     get_event,
     list_published_events,
+    update_event,
 )
 from app.modules.events.interfaces.http.deps import EventRepoDep
 from app.modules.events.interfaces.http.schemas import (
     EventCreateRequest,
     EventResponse,
+    EventUpdateRequest,
     PaginatedEventsResponse,
 )
 from app.modules.identity.application.dtos import UserDTO
@@ -56,4 +58,29 @@ def list_events_route(
 @router.get("/{event_id}", response_model=EventResponse)
 def get_event_route(event_id: int, repo: EventRepoDep) -> EventResponse:
     dto = get_event(event_id, repo)
+    return EventResponse(**dto.__dict__)
+
+
+@router.patch("/{event_id}", response_model=EventResponse)
+def update_event_route(
+    event_id: int,
+    req: EventUpdateRequest,
+    repo: EventRepoDep,
+    me: UserDTO = Depends(get_current_user),
+) -> EventResponse:
+    cmd = UpdateEventCmd(
+        name=req.name,
+        description=req.description,
+        location=req.location,
+        starts_at=req.starts_at,
+        ends_at=req.ends_at,
+        capacity=req.capacity,
+    )
+    dto = update_event(
+        cmd,
+        event_id=event_id,
+        actor_id=me.id,
+        actor_role=me.role,
+        repo=repo,
+    )
     return EventResponse(**dto.__dict__)

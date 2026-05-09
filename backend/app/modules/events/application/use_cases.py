@@ -2,10 +2,17 @@ from app.modules.events.application.dtos import (
     CreateEventCmd,
     EventDTO,
     PaginatedEventsDTO,
+    UpdateEventCmd,
 )
 from app.modules.events.domain.entities import Event
+from app.modules.events.domain.exceptions import (
+    CapacityBelowRegistered,
+    EventNotModifiable,
+    EventNotOwned,
+)
 from app.modules.events.domain.repositories import EventRepository
 from app.modules.events.domain.value_objects import DateRange
+from app.modules.identity.domain.entities import UserRole
 
 
 def to_dto(event: Event) -> EventDTO:
@@ -41,6 +48,37 @@ def create_event(
 
 def get_event(event_id: int, repo: EventRepository) -> EventDTO:
     return to_dto(repo.get(event_id))
+
+
+def update_event(
+    cmd: UpdateEventCmd,
+    event_id: int,
+    actor_id: int,
+    actor_role: UserRole,
+    repo: EventRepository,
+) -> EventDTO:
+    event = repo.get(event_id)
+    if actor_role != UserRole.admin and event.organizer_id != actor_id:
+        raise EventNotOwned(str(event_id))
+    if not event.is_modifiable():
+        raise EventNotModifiable(str(event_id))
+
+    if cmd.name is not None:
+        event.name = cmd.name
+    if cmd.description is not None:
+        event.description = cmd.description
+    if cmd.location is not None:
+        event.location = cmd.location
+    if cmd.starts_at is not None or cmd.ends_at is not None:
+        new_start = cmd.starts_at if cmd.starts_at is not None else event.schedule.start
+        new_end = cmd.ends_at if cmd.ends_at is not None else event.schedule.end
+        event.schedule = DateRange(new_start, new_end)
+    if cmd.capacity is not None:
+        if cmd.capacity < event.registered_count:
+            raise CapacityBelowRegistered(str(event_id))
+        event.capacity = cmd.capacity
+
+    return to_dto(repo.update(event))
 
 
 def list_published_events(

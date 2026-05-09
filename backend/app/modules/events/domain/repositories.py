@@ -19,3 +19,7 @@ class EventRepository(Protocol):
     def get(self, event_id: int) -> Event:
         """Return the event by id; raise EventNotFound if it does not exist."""
         ...
+
+    def update(self, event: Event) -> Event:
+        """Persist mutable fields of the given event; raise EventNotFound if missing."""
+        ...
