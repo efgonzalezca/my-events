@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlmodel import Session
 
-from app.modules.events.application.ports import EventScheduleReader
+from app.modules.events.application.ports import EventReader, EventScheduleReader
 from app.modules.events.domain.exceptions import EventNotFound
 from app.modules.events.infrastructure.orm import EventORM
 
@@ -20,3 +20,11 @@ class SqlEventScheduleReader(EventScheduleReader):
         if orm is None:
             raise EventNotFound(str(event_id))
         return _as_utc(orm.starts_at), _as_utc(orm.ends_at)
+
+
+class SqlEventReader(EventReader):
+    def __init__(self, session: Session) -> None:
+        self._s = session
+
+    def exists(self, event_id: int) -> bool:
+        return self._s.get(EventORM, event_id) is not None

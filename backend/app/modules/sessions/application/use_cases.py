@@ -1,4 +1,5 @@
-from app.modules.events.application.ports import EventScheduleReader
+from app.modules.events.application.ports import EventReader, EventScheduleReader
+from app.modules.events.domain.exceptions import EventNotFound
 from app.modules.events.domain.value_objects import DateRange
 from app.modules.sessions.application.dtos import CreateSessionCmd, SessionDTO
 from app.modules.sessions.domain.entities import Session
@@ -50,3 +51,15 @@ def create_session(
         schedule=session_range,
     )
     return to_dto(repo.add(session))
+
+
+def list_sessions_of_event(
+    event_id: int, repo: SessionRepository, event_reader: EventReader
+) -> list[SessionDTO]:
+    if not event_reader.exists(event_id):
+        raise EventNotFound(str(event_id))
+    return [to_dto(s) for s in repo.list_by_event(event_id)]
+
+
+def get_session(session_id: int, repo: SessionRepository) -> SessionDTO:
+    return to_dto(repo.get(session_id))

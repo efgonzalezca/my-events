@@ -1,11 +1,18 @@
 from fastapi import APIRouter
 
 from app.interfaces.http.auth import require_role
-from app.modules.events.interfaces.http.deps import EventScheduleReaderDep
+from app.modules.events.interfaces.http.deps import (
+    EventReaderDep,
+    EventScheduleReaderDep,
+)
 from app.modules.identity.application.dtos import UserDTO
 from app.modules.identity.domain.entities import UserRole
 from app.modules.sessions.application.dtos import CreateSessionCmd
-from app.modules.sessions.application.use_cases import create_session
+from app.modules.sessions.application.use_cases import (
+    create_session,
+    get_session,
+    list_sessions_of_event,
+)
 from app.modules.sessions.interfaces.http.deps import SessionRepoDep
 from app.modules.sessions.interfaces.http.schemas import (
     SessionCreateRequest,
@@ -36,4 +43,24 @@ def create_session_route(
     dto = create_session(
         cmd, event_id=event_id, repo=repo, schedule_reader=schedule_reader
     )
+    return SessionResponse(**dto.__dict__)
+
+
+@router.get(
+    "/events/{event_id}/sessions", response_model=list[SessionResponse]
+)
+def list_sessions_route(
+    event_id: int,
+    repo: SessionRepoDep,
+    event_reader: EventReaderDep,
+) -> list[SessionResponse]:
+    items = list_sessions_of_event(event_id, repo=repo, event_reader=event_reader)
+    return [SessionResponse(**s.__dict__) for s in items]
+
+
+@router.get("/sessions/{session_id}", response_model=SessionResponse)
+def get_session_route(
+    session_id: int, repo: SessionRepoDep
+) -> SessionResponse:
+    dto = get_session(session_id, repo=repo)
     return SessionResponse(**dto.__dict__)

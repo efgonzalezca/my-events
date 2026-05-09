@@ -9,3 +9,7 @@ class SessionRepository(Protocol):
     def list_by_event(self, event_id: int) -> list[Session]:
         """Return all sessions of the given event, ordered by start asc."""
         ...
+
+    def get(self, session_id: int) -> Session:
+        """Return the session by id; raise SessionNotFound if it does not exist."""
+        ...

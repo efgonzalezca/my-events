@@ -2,6 +2,7 @@ from sqlmodel import Session as DbSession
 from sqlmodel import select
 
 from app.modules.sessions.domain.entities import Session
+from app.modules.sessions.domain.exceptions import SessionNotFound
 from app.modules.sessions.domain.repositories import SessionRepository
 from app.modules.sessions.infrastructure.mappers import to_domain, to_orm
 from app.modules.sessions.infrastructure.orm import SessionORM
@@ -25,3 +26,9 @@ class SqlSessionRepository(SessionRepository):
             .order_by(SessionORM.starts_at.asc())
         ).all()
         return [to_domain(r) for r in rows]
+
+    def get(self, session_id: int) -> Session:
+        orm = self._s.get(SessionORM, session_id)
+        if orm is None:
+            raise SessionNotFound(str(session_id))
+        return to_domain(orm)
