@@ -7,6 +7,9 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         debug=settings.debug,
+        docs_url=f"{settings.api_prefix}/docs",
+        redoc_url=f"{settings.api_prefix}/redoc",
+        openapi_url=f"{settings.api_prefix}/openapi.json"
     )
 
     api = APIRouter(prefix=settings.api_prefix)
