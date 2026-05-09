@@ -11,7 +11,7 @@ from app.modules.events.domain.exceptions import (
     EventNotOwned,
 )
 from app.modules.events.domain.repositories import EventRepository
-from app.modules.events.domain.value_objects import DateRange
+from app.modules.events.domain.value_objects import DateRange, EventStatus
 from app.modules.identity.domain.entities import UserRole
 
 
@@ -79,6 +79,32 @@ def update_event(
         event.capacity = cmd.capacity
 
     return to_dto(repo.update(event))
+
+
+def _transition(
+    event_id: int,
+    actor_id: int,
+    actor_role: UserRole,
+    repo: EventRepository,
+    target: EventStatus,
+) -> EventDTO:
+    event = repo.get(event_id)
+    if actor_role != UserRole.admin and event.organizer_id != actor_id:
+        raise EventNotOwned(str(event_id))
+    event.transition_to(target)
+    return to_dto(repo.update(event))
+
+
+def publish_event(
+    event_id: int, actor_id: int, actor_role: UserRole, repo: EventRepository
+) -> EventDTO:
+    return _transition(event_id, actor_id, actor_role, repo, EventStatus.published)
+
+
+def cancel_event(
+    event_id: int, actor_id: int, actor_role: UserRole, repo: EventRepository
+) -> EventDTO:
+    return _transition(event_id, actor_id, actor_role, repo, EventStatus.cancelled)
 
 
 def list_published_events(

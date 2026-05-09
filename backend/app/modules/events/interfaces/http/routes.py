@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, Query
 from app.interfaces.http.auth import get_current_user, require_role
 from app.modules.events.application.dtos import CreateEventCmd, UpdateEventCmd
 from app.modules.events.application.use_cases import (
+    cancel_event,
     create_event,
     get_event,
     list_published_events,
+    publish_event,
     update_event,
 )
 from app.modules.events.interfaces.http.deps import EventRepoDep
@@ -82,5 +84,29 @@ def update_event_route(
         actor_id=me.id,
         actor_role=me.role,
         repo=repo,
+    )
+    return EventResponse(**dto.__dict__)
+
+
+@router.post("/{event_id}/publish", response_model=EventResponse)
+def publish_event_route(
+    event_id: int,
+    repo: EventRepoDep,
+    me: UserDTO = Depends(get_current_user),
+) -> EventResponse:
+    dto = publish_event(
+        event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
+    )
+    return EventResponse(**dto.__dict__)
+
+
+@router.post("/{event_id}/cancel", response_model=EventResponse)
+def cancel_event_route(
+    event_id: int,
+    repo: EventRepoDep,
+    me: UserDTO = Depends(get_current_user),
+) -> EventResponse:
+    dto = cancel_event(
+        event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
     )
     return EventResponse(**dto.__dict__)
