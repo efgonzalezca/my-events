@@ -1,4 +1,8 @@
-from app.modules.events.application.dtos import CreateEventCmd, EventDTO
+from app.modules.events.application.dtos import (
+    CreateEventCmd,
+    EventDTO,
+    PaginatedEventsDTO,
+)
 from app.modules.events.domain.entities import Event
 from app.modules.events.domain.repositories import EventRepository
 from app.modules.events.domain.value_objects import DateRange
@@ -33,3 +37,16 @@ def create_event(
         organizer_id=organizer_id,
     )
     return to_dto(repo.add(event))
+
+
+def list_published_events(
+    q: str | None, page: int, size: int, repo: EventRepository
+) -> PaginatedEventsDTO:
+    offset = (page - 1) * size
+    items, total = repo.list_published(q=q, offset=offset, limit=size)
+    return PaginatedEventsDTO(
+        items=[to_dto(e) for e in items],
+        page=page,
+        size=size,
+        total=total,
+    )

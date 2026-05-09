@@ -25,3 +25,10 @@ class EventResponse(BaseModel):
     registered_count: int
     status: EventStatus
     organizer_id: int
+
+
+class PaginatedEventsResponse(BaseModel):
+    items: list[EventResponse]
+    page: int
+    size: int
+    total: int

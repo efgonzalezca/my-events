@@ -26,3 +26,11 @@ class EventDTO:
     registered_count: int
     status: EventStatus
     organizer_id: int
+
+
+@dataclass(frozen=True)
+class PaginatedEventsDTO:
+    items: list[EventDTO]
+    page: int
+    size: int
+    total: int

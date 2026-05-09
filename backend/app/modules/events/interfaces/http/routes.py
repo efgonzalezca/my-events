@@ -1,12 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from app.interfaces.http.auth import require_role
 from app.modules.events.application.dtos import CreateEventCmd
-from app.modules.events.application.use_cases import create_event
+from app.modules.events.application.use_cases import (
+    create_event,
+    list_published_events,
+)
 from app.modules.events.interfaces.http.deps import EventRepoDep
 from app.modules.events.interfaces.http.schemas import (
     EventCreateRequest,
     EventResponse,
+    PaginatedEventsResponse,
 )
 from app.modules.identity.application.dtos import UserDTO
 from app.modules.identity.domain.entities import UserRole
@@ -30,3 +34,19 @@ def create_event_route(
     )
     dto = create_event(cmd, organizer_id=me.id, repo=repo)
     return EventResponse(**dto.__dict__)
+
+
+@router.get("", response_model=PaginatedEventsResponse)
+def list_events_route(
+    repo: EventRepoDep,
+    q: str | None = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=50),
+) -> PaginatedEventsResponse:
+    dto = list_published_events(q=q, page=page, size=size, repo=repo)
+    return PaginatedEventsResponse(
+        items=[EventResponse(**e.__dict__) for e in dto.items],
+        page=dto.page,
+        size=dto.size,
+        total=dto.total,
+    )
