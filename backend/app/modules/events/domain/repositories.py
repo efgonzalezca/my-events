@@ -15,3 +15,7 @@ class EventRepository(Protocol):
         Total is the count after filtering, before paginating.
         """
         ...
+
+    def get(self, event_id: int) -> Event:
+        """Return the event by id; raise EventNotFound if it does not exist."""
+        ...

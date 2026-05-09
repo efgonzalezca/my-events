@@ -125,6 +125,7 @@ When adding a new module with persistent state, import its ORM model in
 | GET    | `/api/auth/me`       | Bearer                | Current user profile                         |
 | POST   | `/api/events`        | Bearer (organizer/admin) | Create an event (status starts as `draft`) |
 | GET    | `/api/events`        | —                     | List published events with pagination (`q`, `page`, `size`) |
+| GET    | `/api/events/{id}`   | —                     | Event detail (any status); 404 if not found                  |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

@@ -4,6 +4,7 @@ from app.interfaces.http.auth import require_role
 from app.modules.events.application.dtos import CreateEventCmd
 from app.modules.events.application.use_cases import (
     create_event,
+    get_event,
     list_published_events,
 )
 from app.modules.events.interfaces.http.deps import EventRepoDep
@@ -50,3 +51,9 @@ def list_events_route(
         size=dto.size,
         total=dto.total,
     )
+
+
+@router.get("/{event_id}", response_model=EventResponse)
+def get_event_route(event_id: int, repo: EventRepoDep) -> EventResponse:
+    dto = get_event(event_id, repo)
+    return EventResponse(**dto.__dict__)

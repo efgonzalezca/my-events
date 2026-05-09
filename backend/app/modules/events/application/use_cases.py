@@ -39,6 +39,10 @@ def create_event(
     return to_dto(repo.add(event))
 
 
+def get_event(event_id: int, repo: EventRepository) -> EventDTO:
+    return to_dto(repo.get(event_id))
+
+
 def list_published_events(
     q: str | None, page: int, size: int, repo: EventRepository
 ) -> PaginatedEventsDTO:

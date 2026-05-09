@@ -2,6 +2,7 @@ from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.modules.events.domain.entities import Event
+from app.modules.events.domain.exceptions import EventNotFound
 from app.modules.events.domain.repositories import EventRepository
 from app.modules.events.domain.value_objects import EventStatus
 from app.modules.events.infrastructure.mappers import to_domain, to_orm
@@ -38,3 +39,9 @@ class SqlEventRepository(EventRepository):
         rows = self._s.exec(items_stmt).all()
         total = self._s.exec(count_stmt).one()
         return [to_domain(r) for r in rows], int(total)
+
+    def get(self, event_id: int) -> Event:
+        orm = self._s.get(EventORM, event_id)
+        if orm is None:
+            raise EventNotFound(str(event_id))
+        return to_domain(orm)
