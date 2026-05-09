@@ -2,6 +2,7 @@ from app.modules.speakers.application.dtos import (
     CreateSpeakerCmd,
     PaginatedSpeakersDTO,
     SpeakerDTO,
+    UpdateSpeakerCmd,
 )
 from app.modules.speakers.domain.entities import Speaker
 from app.modules.speakers.domain.repositories import SpeakerRepository
@@ -42,3 +43,20 @@ def list_speakers(
         size=size,
         total=total,
     )
+
+
+def update_speaker(
+    cmd: UpdateSpeakerCmd, speaker_id: int, repo: SpeakerRepository
+) -> SpeakerDTO:
+    speaker = repo.get(speaker_id)
+    if cmd.name is not None:
+        speaker.name = cmd.name
+    if cmd.bio is not None:
+        speaker.bio = cmd.bio
+    if cmd.photo_url is not None:
+        speaker.photo_url = cmd.photo_url
+    return to_dto(repo.update(speaker))
+
+
+def delete_speaker(speaker_id: int, repo: SpeakerRepository) -> None:
+    repo.delete(speaker_id)

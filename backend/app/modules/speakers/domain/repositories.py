@@ -15,3 +15,11 @@ class SpeakerRepository(Protocol):
     ) -> tuple[list[Speaker], int]:
         """Return (items, total). If q is provided, filters by name case-insensitive."""
         ...
+
+    def update(self, speaker: Speaker) -> Speaker:
+        """Persist mutable fields; raise SpeakerNotFound if missing."""
+        ...
+
+    def delete(self, speaker_id: int) -> None:
+        """Remove the speaker by id; raise SpeakerNotFound if it does not exist."""
+        ...

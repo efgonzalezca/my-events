@@ -138,6 +138,8 @@ When adding a new module with persistent state, import its ORM model in
 | POST   | `/api/speakers`            | Bearer (organizer/admin) | Create a speaker                                          |
 | GET    | `/api/speakers`            | —                     | List speakers with pagination (`q`, `page`, `size`)              |
 | GET    | `/api/speakers/{id}`       | —                     | Speaker detail; 404 `SPEAKER_NOT_FOUND` if missing                |
+| PATCH  | `/api/speakers/{id}`       | Bearer (organizer/admin) | Update speaker fields (all optional)                           |
+| DELETE | `/api/speakers/{id}`       | Bearer (organizer/admin) | Delete a speaker; 204                                          |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

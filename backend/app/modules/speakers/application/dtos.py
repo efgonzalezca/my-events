@@ -9,6 +9,13 @@ class CreateSpeakerCmd:
 
 
 @dataclass(frozen=True)
+class UpdateSpeakerCmd:
+    name: str | None = None
+    bio: str | None = None
+    photo_url: str | None = None
+
+
+@dataclass(frozen=True)
 class SpeakerDTO:
     id: int
     name: str

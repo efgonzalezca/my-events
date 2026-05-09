@@ -44,3 +44,22 @@ class SqlSpeakerRepository(SpeakerRepository):
         rows = self._s.exec(items_stmt).all()
         total = self._s.exec(count_stmt).one()
         return [to_domain(r) for r in rows], int(total)
+
+    def update(self, speaker: Speaker) -> Speaker:
+        orm = self._s.get(SpeakerORM, speaker.id)
+        if orm is None:
+            raise SpeakerNotFound(str(speaker.id))
+        orm.name = speaker.name
+        orm.bio = speaker.bio
+        orm.photo_url = speaker.photo_url
+        self._s.add(orm)
+        self._s.commit()
+        self._s.refresh(orm)
+        return to_domain(orm)
+
+    def delete(self, speaker_id: int) -> None:
+        orm = self._s.get(SpeakerORM, speaker_id)
+        if orm is None:
+            raise SpeakerNotFound(str(speaker_id))
+        self._s.delete(orm)
+        self._s.commit()

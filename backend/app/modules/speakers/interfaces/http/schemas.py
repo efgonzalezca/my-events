@@ -7,6 +7,12 @@ class SpeakerCreateRequest(BaseModel):
     photo_url: str = Field(default="", max_length=500)
 
 
+class SpeakerUpdateRequest(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    bio: str | None = Field(default=None, max_length=4000)
+    photo_url: str | None = Field(default=None, max_length=500)
+
+
 class SpeakerResponse(BaseModel):
     id: int
     name: str

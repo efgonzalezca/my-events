@@ -3,17 +3,23 @@ from fastapi import APIRouter, Query
 from app.interfaces.http.auth import require_role
 from app.modules.identity.application.dtos import UserDTO
 from app.modules.identity.domain.entities import UserRole
-from app.modules.speakers.application.dtos import CreateSpeakerCmd
+from app.modules.speakers.application.dtos import (
+    CreateSpeakerCmd,
+    UpdateSpeakerCmd,
+)
 from app.modules.speakers.application.use_cases import (
     create_speaker,
+    delete_speaker,
     get_speaker,
     list_speakers,
+    update_speaker,
 )
 from app.modules.speakers.interfaces.http.deps import SpeakerRepoDep
 from app.modules.speakers.interfaces.http.schemas import (
     PaginatedSpeakersResponse,
     SpeakerCreateRequest,
     SpeakerResponse,
+    SpeakerUpdateRequest,
 )
 
 router = APIRouter()
@@ -54,3 +60,24 @@ def list_speakers_route(
 def get_speaker_route(speaker_id: int, repo: SpeakerRepoDep) -> SpeakerResponse:
     dto = get_speaker(speaker_id, repo)
     return SpeakerResponse(**dto.__dict__)
+
+
+@router.patch("/{speaker_id}", response_model=SpeakerResponse)
+def update_speaker_route(
+    speaker_id: int,
+    req: SpeakerUpdateRequest,
+    repo: SpeakerRepoDep,
+    _me: UserDTO = require_role(UserRole.organizer, UserRole.admin),
+) -> SpeakerResponse:
+    cmd = UpdateSpeakerCmd(name=req.name, bio=req.bio, photo_url=req.photo_url)
+    dto = update_speaker(cmd, speaker_id=speaker_id, repo=repo)
+    return SpeakerResponse(**dto.__dict__)
+
+
+@router.delete("/{speaker_id}", status_code=204)
+def delete_speaker_route(
+    speaker_id: int,
+    repo: SpeakerRepoDep,
+    _me: UserDTO = require_role(UserRole.organizer, UserRole.admin),
+) -> None:
+    delete_speaker(speaker_id, repo=repo)
