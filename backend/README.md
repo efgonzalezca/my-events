@@ -45,6 +45,11 @@ backend/
 │   │   │   ├── application/             # use cases + DTOs
 │   │   │   ├── infrastructure/          # SQLModel ORM, mappers, SqlUserRepository
 │   │   │   └── interfaces/http/         # routes, schemas, FastAPI deps
+│   │   ├── sessions/
+│   │   │   ├── domain/                  # Session entity, SchedulePolicy, errors
+│   │   │   ├── application/             # use cases + DTOs (consumes EventScheduleReader port)
+│   │   │   ├── infrastructure/          # SQLModel ORM, mappers, SqlSessionRepository
+│   │   │   └── interfaces/http/         # routes, schemas, FastAPI deps
 │   │   └── speakers/
 │   │       ├── domain/                  # Speaker entity, repo Protocol
 │   │       ├── application/             # use cases + DTOs
@@ -140,6 +145,7 @@ When adding a new module with persistent state, import its ORM model in
 | GET    | `/api/speakers/{id}`       | —                     | Speaker detail; 404 `SPEAKER_NOT_FOUND` if missing                |
 | PATCH  | `/api/speakers/{id}`       | Bearer (organizer/admin) | Update speaker fields (all optional)                           |
 | DELETE | `/api/speakers/{id}`       | Bearer (organizer/admin) | Delete a speaker; 204                                          |
+| POST   | `/api/events/{id}/sessions` | Bearer (organizer/admin) | Create a session inside the event range; 409 on out-of-range or schedule conflict |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

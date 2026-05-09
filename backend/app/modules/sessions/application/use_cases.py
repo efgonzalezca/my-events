@@ -1,0 +1,52 @@
+from app.modules.events.application.ports import EventScheduleReader
+from app.modules.events.domain.value_objects import DateRange
+from app.modules.sessions.application.dtos import CreateSessionCmd, SessionDTO
+from app.modules.sessions.domain.entities import Session
+from app.modules.sessions.domain.exceptions import (
+    SessionOutOfEventRange,
+    SessionScheduleConflict,
+)
+from app.modules.sessions.domain.policies import SchedulePolicy
+from app.modules.sessions.domain.repositories import SessionRepository
+
+
+def to_dto(session: Session) -> SessionDTO:
+    assert session.id is not None
+    return SessionDTO(
+        id=session.id,
+        event_id=session.event_id,
+        title=session.title,
+        description=session.description,
+        starts_at=session.schedule.start,
+        ends_at=session.schedule.end,
+        speaker_ids=list(session.speaker_ids),
+    )
+
+
+def create_session(
+    cmd: CreateSessionCmd,
+    event_id: int,
+    repo: SessionRepository,
+    schedule_reader: EventScheduleReader,
+) -> SessionDTO:
+    event_start, event_end = schedule_reader.get_schedule(event_id)
+    event_range = DateRange(event_start, event_end)
+    session_range = DateRange(cmd.starts_at, cmd.ends_at)
+
+    if not SchedulePolicy.fits_in(session_range, event_range):
+        raise SessionOutOfEventRange(str(event_id))
+
+    existing = repo.list_by_event(event_id)
+    if SchedulePolicy.overlaps_with(
+        session_range, [s.schedule for s in existing]
+    ):
+        raise SessionScheduleConflict(str(event_id))
+
+    session = Session(
+        id=None,
+        event_id=event_id,
+        title=cmd.title,
+        description=cmd.description,
+        schedule=session_range,
+    )
+    return to_dto(repo.add(session))

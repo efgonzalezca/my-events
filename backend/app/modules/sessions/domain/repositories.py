@@ -1,0 +1,11 @@
+from typing import Protocol
+
+from app.modules.sessions.domain.entities import Session
+
+
+class SessionRepository(Protocol):
+    def add(self, session: Session) -> Session: ...
+
+    def list_by_event(self, event_id: int) -> list[Session]:
+        """Return all sessions of the given event, ordered by start asc."""
+        ...
