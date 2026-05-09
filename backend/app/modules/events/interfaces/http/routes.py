@@ -5,6 +5,7 @@ from app.modules.events.application.dtos import CreateEventCmd, UpdateEventCmd
 from app.modules.events.application.use_cases import (
     cancel_event,
     create_event,
+    delete_event,
     get_event,
     list_published_events,
     publish_event,
@@ -110,3 +111,14 @@ def cancel_event_route(
         event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
     )
     return EventResponse(**dto.__dict__)
+
+
+@router.delete("/{event_id}", status_code=204)
+def delete_event_route(
+    event_id: int,
+    repo: EventRepoDep,
+    me: UserDTO = Depends(get_current_user),
+) -> None:
+    delete_event(
+        event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
+    )

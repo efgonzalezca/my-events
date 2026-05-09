@@ -62,3 +62,10 @@ class SqlEventRepository(EventRepository):
         self._s.commit()
         self._s.refresh(orm)
         return to_domain(orm)
+
+    def delete(self, event_id: int) -> None:
+        orm = self._s.get(EventORM, event_id)
+        if orm is None:
+            raise EventNotFound(str(event_id))
+        self._s.delete(orm)
+        self._s.commit()

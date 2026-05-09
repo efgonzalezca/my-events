@@ -107,6 +107,17 @@ def cancel_event(
     return _transition(event_id, actor_id, actor_role, repo, EventStatus.cancelled)
 
 
+def delete_event(
+    event_id: int, actor_id: int, actor_role: UserRole, repo: EventRepository
+) -> None:
+    event = repo.get(event_id)
+    if actor_role != UserRole.admin and event.organizer_id != actor_id:
+        raise EventNotOwned(str(event_id))
+    if event.status not in (EventStatus.draft, EventStatus.cancelled):
+        raise EventNotModifiable(str(event_id))
+    repo.delete(event_id)
+
+
 def list_published_events(
     q: str | None, page: int, size: int, repo: EventRepository
 ) -> PaginatedEventsDTO:

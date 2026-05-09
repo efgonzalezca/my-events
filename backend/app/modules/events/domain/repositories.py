@@ -23,3 +23,7 @@ class EventRepository(Protocol):
     def update(self, event: Event) -> Event:
         """Persist mutable fields of the given event; raise EventNotFound if missing."""
         ...
+
+    def delete(self, event_id: int) -> None:
+        """Remove the event by id; raise EventNotFound if it does not exist."""
+        ...
