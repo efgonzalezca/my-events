@@ -1,7 +1,11 @@
 from app.modules.events.application.ports import EventReader, EventScheduleReader
 from app.modules.events.domain.exceptions import EventNotFound
 from app.modules.events.domain.value_objects import DateRange
-from app.modules.sessions.application.dtos import CreateSessionCmd, SessionDTO
+from app.modules.sessions.application.dtos import (
+    CreateSessionCmd,
+    SessionDTO,
+    UpdateSessionCmd,
+)
 from app.modules.sessions.domain.entities import Session
 from app.modules.sessions.domain.exceptions import (
     SessionOutOfEventRange,
@@ -63,3 +67,41 @@ def list_sessions_of_event(
 
 def get_session(session_id: int, repo: SessionRepository) -> SessionDTO:
     return to_dto(repo.get(session_id))
+
+
+def update_session(
+    cmd: UpdateSessionCmd,
+    session_id: int,
+    repo: SessionRepository,
+    schedule_reader: EventScheduleReader,
+) -> SessionDTO:
+    session = repo.get(session_id)
+
+    if cmd.title is not None:
+        session.title = cmd.title
+    if cmd.description is not None:
+        session.description = cmd.description
+
+    schedule_changed = cmd.starts_at is not None or cmd.ends_at is not None
+    if schedule_changed:
+        new_start = cmd.starts_at if cmd.starts_at is not None else session.schedule.start
+        new_end = cmd.ends_at if cmd.ends_at is not None else session.schedule.end
+        new_range = DateRange(new_start, new_end)
+
+        event_start, event_end = schedule_reader.get_schedule(session.event_id)
+        if not SchedulePolicy.fits_in(new_range, DateRange(event_start, event_end)):
+            raise SessionOutOfEventRange(str(session.event_id))
+
+        others = [
+            s for s in repo.list_by_event(session.event_id) if s.id != session_id
+        ]
+        if SchedulePolicy.overlaps_with(new_range, [s.schedule for s in others]):
+            raise SessionScheduleConflict(str(session.event_id))
+
+        session.schedule = new_range
+
+    return to_dto(repo.update(session))
+
+
+def delete_session(session_id: int, repo: SessionRepository) -> None:
+    repo.delete(session_id)

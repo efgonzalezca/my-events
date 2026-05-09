@@ -148,6 +148,8 @@ When adding a new module with persistent state, import its ORM model in
 | POST   | `/api/events/{id}/sessions` | Bearer (organizer/admin) | Create a session inside the event range; 409 on out-of-range or schedule conflict |
 | GET    | `/api/events/{id}/sessions` | —                     | List sessions of the event; 404 `EVENT_NOT_FOUND` if the event is missing       |
 | GET    | `/api/sessions/{id}`        | —                     | Session detail; 404 `SESSION_NOT_FOUND` if missing                              |
+| PATCH  | `/api/sessions/{id}`        | Bearer (organizer/admin) | Update session fields; revalidates fits_in and overlap if schedule changes   |
+| DELETE | `/api/sessions/{id}`        | Bearer (organizer/admin) | Delete a session; 204                                                        |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

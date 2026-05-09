@@ -11,6 +11,14 @@ class CreateSessionCmd:
 
 
 @dataclass(frozen=True)
+class UpdateSessionCmd:
+    title: str | None = None
+    description: str | None = None
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+
+
+@dataclass(frozen=True)
 class SessionDTO:
     id: int
     event_id: int

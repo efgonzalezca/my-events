@@ -32,3 +32,23 @@ class SqlSessionRepository(SessionRepository):
         if orm is None:
             raise SessionNotFound(str(session_id))
         return to_domain(orm)
+
+    def update(self, session: Session) -> Session:
+        orm = self._s.get(SessionORM, session.id)
+        if orm is None:
+            raise SessionNotFound(str(session.id))
+        orm.title = session.title
+        orm.description = session.description
+        orm.starts_at = session.schedule.start
+        orm.ends_at = session.schedule.end
+        self._s.add(orm)
+        self._s.commit()
+        self._s.refresh(orm)
+        return to_domain(orm)
+
+    def delete(self, session_id: int) -> None:
+        orm = self._s.get(SessionORM, session_id)
+        if orm is None:
+            raise SessionNotFound(str(session_id))
+        self._s.delete(orm)
+        self._s.commit()

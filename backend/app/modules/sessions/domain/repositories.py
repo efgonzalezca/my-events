@@ -13,3 +13,11 @@ class SessionRepository(Protocol):
     def get(self, session_id: int) -> Session:
         """Return the session by id; raise SessionNotFound if it does not exist."""
         ...
+
+    def update(self, session: Session) -> Session:
+        """Persist mutable fields; raise SessionNotFound if missing."""
+        ...
+
+    def delete(self, session_id: int) -> None:
+        """Remove the session by id; raise SessionNotFound if it does not exist."""
+        ...
