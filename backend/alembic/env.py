@@ -10,6 +10,7 @@ from app.modules.identity.infrastructure.orm import UserORM  # noqa: F401
 from app.modules.events.infrastructure.orm import EventORM  # noqa: F401
 from app.modules.speakers.infrastructure.orm import SpeakerORM  # noqa: F401
 from app.modules.sessions.infrastructure.orm import SessionORM  # noqa: F401
+from app.modules.registrations.infrastructure.orm import RegistrationORM  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -45,6 +45,11 @@ backend/
 │   │   │   ├── application/             # use cases + DTOs
 │   │   │   ├── infrastructure/          # SQLModel ORM, mappers, SqlUserRepository
 │   │   │   └── interfaces/http/         # routes, schemas, FastAPI deps
+│   │   ├── registrations/
+│   │   │   ├── domain/                  # Registration entity, errors
+│   │   │   ├── application/             # use cases + DTOs
+│   │   │   ├── infrastructure/          # ORM (UNIQUE user_id+event_id), mappers, atomic try_register
+│   │   │   └── interfaces/http/         # routes, schemas, FastAPI deps
 │   │   ├── sessions/
 │   │   │   ├── domain/                  # Session entity, SchedulePolicy, errors
 │   │   │   ├── application/             # use cases + DTOs (consumes EventScheduleReader port)
@@ -152,6 +157,7 @@ When adding a new module with persistent state, import its ORM model in
 | DELETE | `/api/sessions/{id}`        | Bearer (organizer/admin) | Delete a session; 204                                                        |
 | POST   | `/api/sessions/{sid}/speakers/{spid}` | Bearer (organizer/admin) | Link speaker to session; 404 if speaker missing, 409 if already linked |
 | DELETE | `/api/sessions/{sid}/speakers/{spid}` | Bearer (organizer/admin) | Unlink speaker from session; 204; 404 if not linked                  |
+| POST   | `/api/events/{id}/register` | Bearer                | Register the authenticated user; 409 on `NOT_PUBLISHED`/`EVENT_FULL`/`ALREADY_REGISTERED` |
 
 Interactive docs: <http://localhost:8000/api/docs>
 
