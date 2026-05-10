@@ -19,7 +19,7 @@ export function LoginPage() {
     setSubmitting(true)
     try {
       await login(email, password)
-      navigate('/profile')
+      navigate('/events')
     } catch (err) {
       setError(describeError(err, 'No pudimos iniciar sesión.'))
     } finally {

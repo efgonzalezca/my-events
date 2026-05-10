@@ -4,6 +4,8 @@ import { ProtectedRoute } from './auth/ProtectedRoute'
 import { Header } from './components/Header'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { EventsListPage } from './pages/EventsListPage'
+import { EventDetailPage } from './pages/EventDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 
 export default function App() {
@@ -14,9 +16,13 @@ export default function App() {
           <Header />
           <main>
             <Routes>
-              <Route path="/" element={<Navigate to="/profile" replace />} />
+              <Route path="/" element={<Navigate to="/events" replace />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+
+              <Route path="/events" element={<EventsListPage />} />
+              <Route path="/events/:id" element={<EventDetailPage />} />
+
               <Route
                 path="/profile"
                 element={
@@ -25,6 +31,7 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

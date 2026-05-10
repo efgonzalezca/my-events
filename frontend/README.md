@@ -54,11 +54,14 @@ npm run lint
 src/
 ├── api/              # axios client + per-module functions
 │   ├── client.ts        # axios + interceptors (auth, 401)
-│   └── auth.ts          # register, login, me
+│   ├── auth.ts          # register, login, me
+│   ├── events.ts        # list, get, create, update, publish, cancel, delete
+│   ├── sessions.ts      # CRUD + link/unlink speakers
+│   └── registrations.ts # register, cancel, my registrations
 ├── auth/
 │   ├── AuthContext.tsx  # provider + useAuth hook
 │   └── ProtectedRoute.tsx
-├── components/       # reusable building blocks (Button, Input, …)
+├── components/       # reusable building blocks (Button, Input, EventCard, Pager, …)
 ├── pages/            # one screen per file
 ├── lib/
 │   ├── errors.ts        # backend code → Spanish message map
@@ -74,4 +77,6 @@ src/
 |---|---|---|
 | `/login` | public | sign in |
 | `/register` | public | create account (role `attendee`) |
-| `/profile` | required | current user details |
+| `/events` | public | paginated list with search |
+| `/events/:id` | public | event detail + sessions; register / cancel registration |
+| `/profile` | required | current user details + my registrations |

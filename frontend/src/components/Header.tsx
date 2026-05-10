@@ -18,10 +18,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-        <Link to="/" className="text-lg font-bold text-indigo-700 whitespace-nowrap">
+        <Link to="/events" className="text-lg font-bold text-indigo-700 whitespace-nowrap">
           My Events
         </Link>
         <nav className="hidden sm:flex items-center gap-1">
+          <NavLink to="/events" className={navItem}>Eventos</NavLink>
           {user && <NavLink to="/profile" className={navItem}>Mi perfil</NavLink>}
         </nav>
         <div className="flex items-center gap-2">
