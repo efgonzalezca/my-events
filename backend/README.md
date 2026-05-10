@@ -10,6 +10,7 @@ REST API built with FastAPI on Python 3.12, packaged in Docker for development.
 - **SQLModel** 0.0.22 / **SQLAlchemy** 2.0.36 / **psycopg** 3.2.3 (binary)
 - **Alembic** 1.14.0 for database migrations
 - **bcrypt** 4.2.1, **PyJWT** 2.10.1, **email-validator** 2.2.0
+- **redis** 5.2.1 (read-through cache for high-traffic public reads)
 - **Pytest** 8.3.4 + **httpx** 0.28.1 (`dev` group)
 
 ## Layout
@@ -64,11 +65,15 @@ backend/
 │   │       ├── infrastructure/          # SQLModel ORM, mappers, SqlSpeakerRepository
 │   │       └── interfaces/http/         # routes, schemas, FastAPI deps
 │   ├── shared/
-│   │   ├── application/ports/auth.py    # PasswordHasher / TokenService Protocols
+│   │   ├── application/
+│   │   │   ├── cache_decorator.py       # @cached(prefix, ttl) read-through wrapper
+│   │   │   └── ports/                   # PasswordHasher / TokenService / CacheService Protocols
 │   │   ├── domain/exceptions.py         # DomainError base
-│   │   └── infrastructure/
-│   │       ├── db.py                    # engine + session_scope
-│   │       └── security/                # BcryptHasher, JwtTokenService
+│   │   ├── infrastructure/
+│   │   │   ├── cache/                   # NullCache + RedisCache (SCAN + UNLINK)
+│   │   │   ├── db.py                    # engine + session_scope
+│   │   │   └── security/                # BcryptHasher, JwtTokenService
+│   │   └── interfaces/http/deps.py      # CacheDep singleton (RedisCache)
 │   └── main.py                          # create_app() + /api APIRouter wiring
 ├── scripts/
 │   ├── seed.py                          # populate the DB with demo data
@@ -98,6 +103,8 @@ Environment variables (see [.env.example](.env.example)):
 | `JWT_SECRET_KEY`              | _(required, no default)_                                      |
 | `JWT_ALGORITHM`               | `HS256`                                                       |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `60`                                                          |
+| `REDIS_URL`                   | `redis://redis:6379/0`                                        |
+| `CACHE_TTL_SECONDS`           | `60`                                                          |
 | `CORS_ORIGINS`                | `http://localhost:5173,http://localhost:3000,http://localhost:4200` (CSV) |
 
 Copy the example before the first run:
@@ -208,6 +215,32 @@ The seed script aborts if the `users` table is not empty, so always run
 | PATCH  | `/api/admin/users/{id}/active` | Bearer (admin)     | Activate or deactivate a user; 409 `CANNOT_MODIFY_SELF` when targeting the caller |
 
 Interactive docs: <http://localhost:8000/api/docs>
+
+## Cache
+
+Read-through cache backed by Redis for high-traffic public reads. Today only
+`GET /api/events` is cached under the `events:list:` prefix; every events
+mutation (create / update / publish / cancel / delete) calls
+`cache.invalidate_prefix("events:")` to drop the entries. TTL is
+`CACHE_TTL_SECONDS` (default 60s) — `registered_count` may be stale up to that
+window after a register/cancel since registrations do not invalidate the
+prefix.
+
+The cache lives behind a `CacheService` Protocol (`get` / `set` /
+`invalidate_prefix`) with two adapters: `RedisCache` for runtime and
+`NullCache` for environments without Redis. Tests override the FastAPI
+dependency with an in-memory `FakeCache` (no Redis required).
+
+```bash
+# Verify a hit after the first GET
+curl -s localhost:8000/api/events | jq '.total'
+docker compose exec redis redis-cli KEYS 'events:list:*'
+# → 1) "events:list:{...}"
+
+# A POST /api/events as organizer drops the prefix
+docker compose exec redis redis-cli KEYS 'events:list:*'
+# → (empty array)
+```
 
 ## Observability
 

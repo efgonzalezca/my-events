@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
+    redis_url: str = "redis://redis:6379/0"
+    cache_ttl_seconds: int = 60
+
     cors_origins: Annotated[list[str], NoDecode]
 
     @field_validator("cors_origins", mode="before")
