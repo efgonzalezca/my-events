@@ -1,7 +1,7 @@
 COMPOSE_DEV := docker compose -f docker-compose.yml -f docker-compose.dev.yml
 SVC         := backend
 
-.PHONY: help dev down logs shell lock build test migrate upgrade downgrade
+.PHONY: help dev down logs shell lock build test migrate upgrade downgrade seed clean-db
 
 help:
 	@echo ""
@@ -20,6 +20,10 @@ help:
 	@echo "  make migrate m=\"...\"    - new revision (autogenerate) + upgrade head"
 	@echo "  make upgrade            - alembic upgrade head"
 	@echo "  make downgrade          - alembic downgrade -1"
+	@echo ""
+	@echo "Demo data:"
+	@echo "  make seed               - populate the database with demo data"
+	@echo "  make clean-db           - truncate every domain table"
 
 dev:
 	$(COMPOSE_DEV) up --build
@@ -54,3 +58,9 @@ upgrade:
 
 downgrade:
 	$(COMPOSE_DEV) exec $(SVC) alembic downgrade -1
+
+seed:
+	$(COMPOSE_DEV) exec -e PYTHONPATH=/app $(SVC) python scripts/seed.py
+
+clean-db:
+	$(COMPOSE_DEV) exec -e PYTHONPATH=/app $(SVC) python scripts/clean.py

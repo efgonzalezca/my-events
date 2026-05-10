@@ -67,6 +67,9 @@ backend/
 │   │       ├── db.py                    # engine + session_scope
 │   │       └── security/                # BcryptHasher, JwtTokenService
 │   └── main.py                          # create_app() + /api APIRouter wiring
+├── scripts/
+│   ├── seed.py                          # populate the DB with demo data
+│   └── clean.py                         # TRUNCATE ... RESTART IDENTITY CASCADE
 ├── Dockerfile                           # multi-stage: base → development
 ├── entrypoint.sh
 ├── pyproject.toml
@@ -92,6 +95,7 @@ Environment variables (see [.env.example](.env.example)):
 | `JWT_SECRET_KEY`              | _(required, no default)_                                      |
 | `JWT_ALGORITHM`               | `HS256`                                                       |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `60`                                                          |
+| `CORS_ORIGINS`                | `http://localhost:5173,http://localhost:3000,http://localhost:4200` (CSV) |
 
 Copy the example before the first run:
 
@@ -113,6 +117,8 @@ make down       # stop the stack
 make build      # rebuild the backend service
 make lock       # regenerate poetry.lock inside the container
 make test       # run pytest -v inside the backend container
+make seed       # populate the database with demo data
+make clean-db   # truncate every domain table (preserves alembic_version)
 ```
 
 The `docker-compose.dev.yml` override mounts `./backend:/app` and starts `uvicorn --reload`, so code changes hot-reload automatically.
@@ -129,6 +135,39 @@ make downgrade                     # alembic downgrade -1
 
 When adding a new module with persistent state, import its ORM model in
 [alembic/env.py](alembic/env.py) so autogenerate can detect the tables.
+
+## Demo data
+
+[scripts/seed.py](scripts/seed.py) populates an empty database with realistic
+data so the frontend has something to render. Run it once after `make dev` (and
+any time you want a fresh dataset, after `make clean-db`):
+
+```bash
+make clean-db   # truncate domain tables (preserves alembic_version)
+make seed       # load users, speakers, events, sessions, registrations
+```
+
+What gets created:
+
+| Entity | Count | Detail |
+|--------|-------|--------|
+| Users | 13 | 1 admin, 4 organizers, 8 attendees — all with password `Test1234$` |
+| Speakers | 6 | Ada Lovelace, Grace Hopper, Linus Torvalds, Guido van Rossum, Brendan Eich, Margaret Hamilton |
+| Events | 13 | 4 past published + 5 future published + 3 draft + 1 cancelled |
+| Sessions | 23 | 2 per past event, 3 per future published event, none on drafts/cancelled |
+| Speaker links | 23 | One speaker per session, rotating through the pool |
+| Registrations | 38 | Distributed across the 9 published events |
+
+Demo logins (all share the same password):
+
+```
+admin@miseventos.com     (admin)
+org1..org4@miseventos.com (organizer)
+att1..att8@miseventos.com (attendee)
+```
+
+The seed script aborts if the `users` table is not empty, so always run
+`make clean-db` first if you want to re-seed.
 
 ## Endpoints
 

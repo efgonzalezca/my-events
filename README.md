@@ -36,7 +36,11 @@ make test                       # run pytest -v inside the backend
 make migrate m="message"        # alembic autogenerate + upgrade head
 make upgrade                    # alembic upgrade head
 make downgrade                  # alembic downgrade -1
+make seed                       # populate the database with demo data
+make clean-db                   # truncate every domain table
 ```
+
+After a fresh `make dev`, run `make seed` once to load demo users, events, sessions, speakers, and registrations. See [backend/README.md](backend/README.md#demo-data) for the credentials and what gets created.
 
 Targets run against the `docker-compose.yml` + `docker-compose.dev.yml` stack.
 
