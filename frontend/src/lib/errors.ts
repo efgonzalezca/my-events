@@ -5,6 +5,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   EMAIL_ALREADY_EXISTS: 'Ya existe una cuenta con ese correo.',
   INVALID_CREDENTIALS: 'Correo o contraseña incorrectos.',
   USER_NOT_FOUND: 'Usuario no encontrado.',
+  CANNOT_MODIFY_SELF: 'No puedes modificar tu propia cuenta.',
   EVENT_NOT_FOUND: 'El evento no existe.',
   EVENT_NOT_OWNED: 'No puedes modificar un evento que no es tuyo.',
   EVENT_NOT_MODIFIABLE: 'Este evento no se puede modificar en su estado actual.',

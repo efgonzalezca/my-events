@@ -17,6 +17,7 @@ export function Header() {
   const navigate = useNavigate()
   const toast = useToast()
   const canManage = !!user && (user.role === 'organizer' || user.role === 'admin')
+  const isAdmin = !!user && user.role === 'admin'
 
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-slate-200">
@@ -28,6 +29,7 @@ export function Header() {
           <NavLink to="/events" className={navItem}>Eventos</NavLink>
           <NavLink to="/speakers" className={navItem}>Ponentes</NavLink>
           {canManage && <NavLink to="/me/events" className={navItem}>Mis eventos</NavLink>}
+          {isAdmin && <NavLink to="/admin/users" className={navItem}>Usuarios</NavLink>}
           {user && <NavLink to="/profile" className={navItem}>Mi perfil</NavLink>}
         </nav>
         <div className="flex items-center gap-2">

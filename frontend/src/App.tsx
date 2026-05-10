@@ -12,6 +12,7 @@ import { MyEventsPage } from './pages/MyEventsPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SpeakersPage } from './pages/SpeakersPage'
 import { SpeakerFormPage } from './pages/SpeakerFormPage'
+import { AdminUsersPage } from './pages/AdminUsersPage'
 
 export default function App() {
   return (
@@ -77,6 +78,15 @@ export default function App() {
                 element={
                   <ProtectedRoute roles={['organizer', 'admin']}>
                     <SpeakerFormPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute roles={['admin']}>
+                    <AdminUsersPage />
                   </ProtectedRoute>
                 }
               />

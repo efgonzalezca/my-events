@@ -62,7 +62,8 @@ src/
 │   ├── events.ts        # list, get, create, update, publish, cancel, delete
 │   ├── sessions.ts      # CRUD + link/unlink speakers
 │   ├── speakers.ts      # CRUD speakers
-│   └── registrations.ts # register, cancel, my registrations
+│   ├── registrations.ts # register, cancel, my registrations
+│   └── admin.ts         # list users, change role, set active
 ├── auth/
 │   ├── AuthContext.tsx  # provider + useAuth hook
 │   └── ProtectedRoute.tsx
@@ -93,6 +94,7 @@ src/
 | `/speakers` | public | — | paginated list with search |
 | `/speakers/new` | required | organizer / admin | create speaker |
 | `/speakers/:id/edit` | required | organizer / admin | edit speaker |
+| `/admin/users` | required | admin | list users, change role and active flag inline |
 
 `/me/events` is fed from `localStorage` (`mevt_my_event_ids`) because the backend
 does not expose a `?organizer_id=me&include_drafts=true` filter; each created
