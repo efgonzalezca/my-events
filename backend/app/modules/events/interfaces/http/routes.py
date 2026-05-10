@@ -20,6 +20,7 @@ from app.modules.events.interfaces.http.schemas import (
 )
 from app.modules.identity.application.dtos import UserDTO
 from app.modules.identity.domain.entities import UserRole
+from app.shared.interfaces.http.deps import CacheDep
 
 router = APIRouter()
 
@@ -28,6 +29,7 @@ router = APIRouter()
 def create_event_route(
     req: EventCreateRequest,
     repo: EventRepoDep,
+    cache: CacheDep,
     me: UserDTO = require_role(UserRole.organizer, UserRole.admin),
 ) -> EventResponse:
     cmd = CreateEventCmd(
@@ -38,23 +40,24 @@ def create_event_route(
         ends_at=req.ends_at,
         capacity=req.capacity,
     )
-    dto = create_event(cmd, organizer_id=me.id, repo=repo)
+    dto = create_event(cmd, organizer_id=me.id, repo=repo, cache=cache)
     return EventResponse(**dto.__dict__)
 
 
 @router.get("", response_model=PaginatedEventsResponse)
 def list_events_route(
     repo: EventRepoDep,
+    cache: CacheDep,
     q: str | None = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=50),
 ) -> PaginatedEventsResponse:
-    dto = list_published_events(q=q, page=page, size=size, repo=repo)
+    dto = list_published_events(q=q, page=page, size=size, repo=repo, cache=cache)
     return PaginatedEventsResponse(
-        items=[EventResponse(**e.__dict__) for e in dto.items],
-        page=dto.page,
-        size=dto.size,
-        total=dto.total,
+        items=[EventResponse(**e) for e in dto["items"]],
+        page=dto["page"],
+        size=dto["size"],
+        total=dto["total"],
     )
 
 
@@ -69,6 +72,7 @@ def update_event_route(
     event_id: int,
     req: EventUpdateRequest,
     repo: EventRepoDep,
+    cache: CacheDep,
     me: UserDTO = Depends(get_current_user),
 ) -> EventResponse:
     cmd = UpdateEventCmd(
@@ -85,6 +89,7 @@ def update_event_route(
         actor_id=me.id,
         actor_role=me.role,
         repo=repo,
+        cache=cache,
     )
     return EventResponse(**dto.__dict__)
 
@@ -93,10 +98,15 @@ def update_event_route(
 def publish_event_route(
     event_id: int,
     repo: EventRepoDep,
+    cache: CacheDep,
     me: UserDTO = Depends(get_current_user),
 ) -> EventResponse:
     dto = publish_event(
-        event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
+        event_id=event_id,
+        actor_id=me.id,
+        actor_role=me.role,
+        repo=repo,
+        cache=cache,
     )
     return EventResponse(**dto.__dict__)
 
@@ -105,10 +115,15 @@ def publish_event_route(
 def cancel_event_route(
     event_id: int,
     repo: EventRepoDep,
+    cache: CacheDep,
     me: UserDTO = Depends(get_current_user),
 ) -> EventResponse:
     dto = cancel_event(
-        event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
+        event_id=event_id,
+        actor_id=me.id,
+        actor_role=me.role,
+        repo=repo,
+        cache=cache,
     )
     return EventResponse(**dto.__dict__)
 
@@ -117,8 +132,13 @@ def cancel_event_route(
 def delete_event_route(
     event_id: int,
     repo: EventRepoDep,
+    cache: CacheDep,
     me: UserDTO = Depends(get_current_user),
 ) -> None:
     delete_event(
-        event_id=event_id, actor_id=me.id, actor_role=me.role, repo=repo
+        event_id=event_id,
+        actor_id=me.id,
+        actor_role=me.role,
+        repo=repo,
+        cache=cache,
     )

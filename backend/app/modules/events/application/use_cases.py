@@ -1,3 +1,7 @@
+from dataclasses import asdict
+from typing import Any
+
+from app.core.config import settings
 from app.modules.events.application.dtos import (
     CreateEventCmd,
     EventDTO,
@@ -13,6 +17,8 @@ from app.modules.events.domain.exceptions import (
 from app.modules.events.domain.repositories import EventRepository
 from app.modules.events.domain.value_objects import DateRange, EventStatus
 from app.modules.identity.domain.entities import UserRole
+from app.shared.application.cache_decorator import cached
+from app.shared.application.ports.cache import CacheService
 
 
 def to_dto(event: Event) -> EventDTO:
@@ -32,7 +38,10 @@ def to_dto(event: Event) -> EventDTO:
 
 
 def create_event(
-    cmd: CreateEventCmd, organizer_id: int, repo: EventRepository
+    cmd: CreateEventCmd,
+    organizer_id: int,
+    repo: EventRepository,
+    cache: CacheService,
 ) -> EventDTO:
     event = Event(
         id=None,
@@ -43,7 +52,9 @@ def create_event(
         capacity=cmd.capacity,
         organizer_id=organizer_id,
     )
-    return to_dto(repo.add(event))
+    dto = to_dto(repo.add(event))
+    cache.invalidate_prefix("events:")
+    return dto
 
 
 def get_event(event_id: int, repo: EventRepository) -> EventDTO:
@@ -56,6 +67,7 @@ def update_event(
     actor_id: int,
     actor_role: UserRole,
     repo: EventRepository,
+    cache: CacheService,
 ) -> EventDTO:
     event = repo.get(event_id)
     if actor_role != UserRole.admin and event.organizer_id != actor_id:
@@ -78,7 +90,9 @@ def update_event(
             raise CapacityBelowRegistered(str(event_id))
         event.capacity = cmd.capacity
 
-    return to_dto(repo.update(event))
+    dto = to_dto(repo.update(event))
+    cache.invalidate_prefix("events:")
+    return dto
 
 
 def _transition(
@@ -86,29 +100,48 @@ def _transition(
     actor_id: int,
     actor_role: UserRole,
     repo: EventRepository,
+    cache: CacheService,
     target: EventStatus,
 ) -> EventDTO:
     event = repo.get(event_id)
     if actor_role != UserRole.admin and event.organizer_id != actor_id:
         raise EventNotOwned(str(event_id))
     event.transition_to(target)
-    return to_dto(repo.update(event))
+    dto = to_dto(repo.update(event))
+    cache.invalidate_prefix("events:")
+    return dto
 
 
 def publish_event(
-    event_id: int, actor_id: int, actor_role: UserRole, repo: EventRepository
+    event_id: int,
+    actor_id: int,
+    actor_role: UserRole,
+    repo: EventRepository,
+    cache: CacheService,
 ) -> EventDTO:
-    return _transition(event_id, actor_id, actor_role, repo, EventStatus.published)
+    return _transition(
+        event_id, actor_id, actor_role, repo, cache, EventStatus.published
+    )
 
 
 def cancel_event(
-    event_id: int, actor_id: int, actor_role: UserRole, repo: EventRepository
+    event_id: int,
+    actor_id: int,
+    actor_role: UserRole,
+    repo: EventRepository,
+    cache: CacheService,
 ) -> EventDTO:
-    return _transition(event_id, actor_id, actor_role, repo, EventStatus.cancelled)
+    return _transition(
+        event_id, actor_id, actor_role, repo, cache, EventStatus.cancelled
+    )
 
 
 def delete_event(
-    event_id: int, actor_id: int, actor_role: UserRole, repo: EventRepository
+    event_id: int,
+    actor_id: int,
+    actor_role: UserRole,
+    repo: EventRepository,
+    cache: CacheService,
 ) -> None:
     event = repo.get(event_id)
     if actor_role != UserRole.admin and event.organizer_id != actor_id:
@@ -116,16 +149,20 @@ def delete_event(
     if event.status not in (EventStatus.draft, EventStatus.cancelled):
         raise EventNotModifiable(str(event_id))
     repo.delete(event_id)
+    cache.invalidate_prefix("events:")
 
 
+@cached("events:list", ttl=settings.cache_ttl_seconds)
 def list_published_events(
     q: str | None, page: int, size: int, repo: EventRepository
-) -> PaginatedEventsDTO:
+) -> dict[str, Any]:
     offset = (page - 1) * size
     items, total = repo.list_published(q=q, offset=offset, limit=size)
-    return PaginatedEventsDTO(
-        items=[to_dto(e) for e in items],
-        page=page,
-        size=size,
-        total=total,
+    return asdict(
+        PaginatedEventsDTO(
+            items=[to_dto(e) for e in items],
+            page=page,
+            size=size,
+            total=total,
+        )
     )

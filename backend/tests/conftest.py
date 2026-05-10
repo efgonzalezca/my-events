@@ -15,6 +15,8 @@ from app.main import app
 from app.modules.identity.domain.entities import UserRole
 from app.modules.identity.infrastructure.orm import UserORM
 from app.shared.infrastructure.db import session_scope
+from app.shared.interfaces.http.deps import get_cache
+from tests.fakes import FakeCache
 
 
 @pytest.fixture
@@ -30,12 +32,18 @@ def engine():
 
 
 @pytest.fixture
-def client(engine) -> Iterator[TestClient]:
+def fake_cache() -> FakeCache:
+    return FakeCache()
+
+
+@pytest.fixture
+def client(engine, fake_cache) -> Iterator[TestClient]:
     def _override() -> Iterator[Session]:
         with Session(engine) as s:
             yield s
 
     app.dependency_overrides[session_scope] = _override
+    app.dependency_overrides[get_cache] = lambda: fake_cache
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
