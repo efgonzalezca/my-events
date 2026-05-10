@@ -6,7 +6,11 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { EventsListPage } from './pages/EventsListPage'
 import { EventDetailPage } from './pages/EventDetailPage'
+import { EventFormPage } from './pages/EventFormPage'
+import { MyEventsPage } from './pages/MyEventsPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { SpeakersPage } from './pages/SpeakersPage'
+import { SpeakerFormPage } from './pages/SpeakerFormPage'
 
 export default function App() {
   return (
@@ -22,12 +26,55 @@ export default function App() {
 
               <Route path="/events" element={<EventsListPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
+              <Route
+                path="/events/new"
+                element={
+                  <ProtectedRoute roles={['organizer', 'admin']}>
+                    <EventFormPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/events/:id/edit"
+                element={
+                  <ProtectedRoute roles={['organizer', 'admin']}>
+                    <EventFormPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/me/events"
+                element={
+                  <ProtectedRoute roles={['organizer', 'admin']}>
+                    <MyEventsPage />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/profile"
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route path="/speakers" element={<SpeakersPage />} />
+              <Route
+                path="/speakers/new"
+                element={
+                  <ProtectedRoute roles={['organizer', 'admin']}>
+                    <SpeakerFormPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/speakers/:id/edit"
+                element={
+                  <ProtectedRoute roles={['organizer', 'admin']}>
+                    <SpeakerFormPage />
                   </ProtectedRoute>
                 }
               />

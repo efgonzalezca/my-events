@@ -57,6 +57,7 @@ src/
 │   ├── auth.ts          # register, login, me
 │   ├── events.ts        # list, get, create, update, publish, cancel, delete
 │   ├── sessions.ts      # CRUD + link/unlink speakers
+│   ├── speakers.ts      # CRUD speakers
 │   └── registrations.ts # register, cancel, my registrations
 ├── auth/
 │   ├── AuthContext.tsx  # provider + useAuth hook
@@ -65,7 +66,8 @@ src/
 ├── pages/            # one screen per file
 ├── lib/
 │   ├── errors.ts        # backend code → Spanish message map
-│   └── datetime.ts      # ISO ↔ datetime-local + es-CO formatting
+│   ├── datetime.ts      # ISO ↔ datetime-local + es-CO formatting
+│   └── myEvents.ts      # localStorage tracker of events created in this browser
 ├── types.ts          # interfaces mirroring the backend
 ├── App.tsx           # routes and layout
 └── main.tsx
@@ -73,10 +75,21 @@ src/
 
 ## Routes
 
-| Path | Auth | Screen |
-|---|---|---|
-| `/login` | public | sign in |
-| `/register` | public | create account (role `attendee`) |
-| `/events` | public | paginated list with search |
-| `/events/:id` | public | event detail + sessions; register / cancel registration |
-| `/profile` | required | current user details + my registrations |
+| Path | Auth | Role | Screen |
+|---|---|---|---|
+| `/login` | public | — | sign in |
+| `/register` | public | — | create account (role `attendee`) |
+| `/events` | public | — | paginated list with search |
+| `/events/:id` | public | — | event detail + sessions; registration; owner controls |
+| `/events/new` | required | organizer / admin | create event (saved as draft) |
+| `/events/:id/edit` | required | organizer / admin | edit event (only while draft) |
+| `/me/events` | required | organizer / admin | events created from this browser |
+| `/profile` | required | any | current user details + my registrations |
+| `/speakers` | public | — | paginated list with search |
+| `/speakers/new` | required | organizer / admin | create speaker |
+| `/speakers/:id/edit` | required | organizer / admin | edit speaker |
+
+`/me/events` is fed from `localStorage` (`mevt_my_event_ids`) because the backend
+does not expose a `?organizer_id=me&include_drafts=true` filter; each created
+event id is tracked locally so organizers can find their drafts and cancelled
+events.

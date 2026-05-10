@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { eventsApi } from '../api/events'
+import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { EventCard } from '../components/EventCard'
 import { Input } from '../components/Input'
@@ -11,6 +13,7 @@ import type { Event, Page } from '../types'
 const PAGE_SIZE = 12
 
 export function EventsListPage() {
+  const { user } = useAuth()
   const [data, setData] = useState<Page<Event> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -53,6 +56,11 @@ export function EventsListPage() {
           <h1 className="text-2xl font-bold text-slate-900">Eventos</h1>
           <p className="text-sm text-slate-500">Eventos abiertos a inscripciones.</p>
         </div>
+        {user && (user.role === 'organizer' || user.role === 'admin') && (
+          <Link to="/events/new">
+            <Button>Crear evento</Button>
+          </Link>
+        )}
       </div>
 
       <form onSubmit={onSearch} className="flex items-end gap-2 mb-6">

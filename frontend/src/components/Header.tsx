@@ -14,6 +14,7 @@ const navItem = ({ isActive }: { isActive: boolean }) =>
 export function Header() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const canManage = !!user && (user.role === 'organizer' || user.role === 'admin')
 
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-slate-200">
@@ -23,6 +24,8 @@ export function Header() {
         </Link>
         <nav className="hidden sm:flex items-center gap-1">
           <NavLink to="/events" className={navItem}>Eventos</NavLink>
+          <NavLink to="/speakers" className={navItem}>Ponentes</NavLink>
+          {canManage && <NavLink to="/me/events" className={navItem}>Mis eventos</NavLink>}
           {user && <NavLink to="/profile" className={navItem}>Mi perfil</NavLink>}
         </nav>
         <div className="flex items-center gap-2">
