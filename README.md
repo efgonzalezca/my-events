@@ -7,6 +7,7 @@ Platform for managing events, sessions, speakers, and registrations.
 Monorepo organized by domain:
 
 - [`backend/`](backend/) — REST API with FastAPI on Python 3.12.
+- [`frontend/`](frontend/) — SPA with React 19 + Vite + TypeScript + Tailwind CSS v4.
 
 ## Requirements
 
@@ -20,7 +21,11 @@ cp backend/.env.example backend/.env
 make dev
 ```
 
-The API is exposed at <http://localhost:8000>, with docs at <http://localhost:8000/api/docs>.
+This brings up the full dev stack (Postgres + backend + frontend):
+
+- Frontend (Vite, hot reload): <http://localhost:5173>
+- Backend: <http://localhost:8000>
+- API docs: <http://localhost:8000/api/docs>
 
 ## Available targets
 
@@ -47,3 +52,4 @@ Targets run against the `docker-compose.yml` + `docker-compose.dev.yml` stack.
 ## Per-service documentation
 
 - [Backend](backend/README.md) — stack, configuration, and endpoints.
+- [Frontend](frontend/README.md) — stack, scripts, routes, and decisions.

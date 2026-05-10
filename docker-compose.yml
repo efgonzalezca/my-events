@@ -25,5 +25,16 @@ services:
     ports:
       - "8000:8000"
 
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    environment:
+      VITE_API_URL: http://localhost:8000/api
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
 volumes:
   pgdata:
