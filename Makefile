@@ -1,7 +1,7 @@
 COMPOSE_DEV := docker compose -f docker-compose.yml -f docker-compose.dev.yml
 SVC         := backend
 
-.PHONY: help dev down logs shell lock build test test-frontend migrate upgrade downgrade seed clean-db
+.PHONY: help dev down logs shell lock build test test-frontend coverage coverage-frontend migrate upgrade downgrade seed clean-db
 
 help:
 	@echo ""
@@ -14,10 +14,12 @@ help:
 	@echo ""
 	@echo "Backend (Python):"
 	@echo "  make test               - pytest -v"
+	@echo "  make coverage           - pytest --cov (term + htmlcov/)"
 	@echo "  make lock               - regenerate poetry.lock"
 	@echo ""
 	@echo "Frontend (Node):"
 	@echo "  make test-frontend      - vitest run"
+	@echo "  make coverage-frontend  - vitest run --coverage (term + coverage/)"
 	@echo ""
 	@echo "Migrations (Alembic):"
 	@echo "  make migrate m=\"...\"    - new revision (autogenerate) + upgrade head"
@@ -47,10 +49,16 @@ build:
 	$(COMPOSE_DEV) build $(SVC)
 
 test:
-	$(COMPOSE_DEV) exec $(SVC) pytest -v
+	$(COMPOSE_DEV) exec $(SVC) poetry run pytest -v
+
+coverage:
+	$(COMPOSE_DEV) exec $(SVC) poetry run pytest --cov --cov-report=term-missing --cov-report=html
 
 test-frontend:
 	$(COMPOSE_DEV) exec frontend npm test
+
+coverage-frontend:
+	$(COMPOSE_DEV) exec frontend npm run coverage
 
 migrate:
 ifndef m

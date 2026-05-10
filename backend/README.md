@@ -127,6 +127,7 @@ make down       # stop the stack
 make build      # rebuild the backend service
 make lock       # regenerate poetry.lock inside the container
 make test       # run pytest -v inside the backend container
+make coverage   # pytest --cov (terminal report + htmlcov/index.html)
 make seed       # populate the database with demo data
 make clean-db   # truncate every domain table (preserves alembic_version)
 ```
@@ -215,6 +216,28 @@ The seed script aborts if the `users` table is not empty, so always run
 | PATCH  | `/api/admin/users/{id}/active` | Bearer (admin)     | Activate or deactivate a user; 409 `CANNOT_MODIFY_SELF` when targeting the caller |
 
 Interactive docs: <http://localhost:8000/api/docs>
+
+## Tests and coverage
+
+`pytest` runs against an in-memory SQLite database with the FastAPI dependency
+overrides set up in [tests/conftest.py](tests/conftest.py) — Postgres and Redis
+are not required to run the suite. The cache layer is exercised against the
+in-memory `FakeCache` from [tests/fakes.py](tests/fakes.py).
+
+```bash
+make test       # 55 tests, ~22s
+make coverage   # same suite + line/branch coverage report
+```
+
+`make coverage` prints a per-file table with the missing lines and writes the
+HTML report to `backend/htmlcov/index.html` (open it in the browser for the
+drill-down view). Coverage is configured in [pyproject.toml](pyproject.toml)
+under `[tool.coverage.run]` — measured over `app/` and excluding the
+process-bootstrapping modules (`app/main.py`, `app/core/logging.py`,
+`alembic/`, `scripts/`) since they are exercised by the framework rather than
+by unit tests.
+
+Latest run (55 passed): **92.9% line coverage** over 1508 statements.
 
 ## Cache
 
