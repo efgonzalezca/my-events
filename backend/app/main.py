@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
     api = APIRouter(prefix=settings.api_prefix)
 
     from app.interfaces.http.routes import health
+    from app.modules.admin.interfaces.http.routes import router as admin_router
     from app.modules.events.interfaces.http.routes import router as events_router
     from app.modules.identity.interfaces.http.routes import router as identity_router
     from app.modules.registrations.interfaces.http.routes import (
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
     api.include_router(speakers_router, prefix="/speakers", tags=["speakers"])
     api.include_router(sessions_router, tags=["sessions"])
     api.include_router(registrations_router, tags=["registrations"])
+    api.include_router(admin_router, prefix="/admin", tags=["admin"])
     app.include_router(api)
     return app
 

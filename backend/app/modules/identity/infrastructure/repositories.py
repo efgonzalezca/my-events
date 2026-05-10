@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
@@ -33,3 +34,17 @@ class SqlUserRepository(UserRepository):
             raise EmailAlreadyExists(user.email.value)
         self._s.refresh(orm)
         return to_domain(orm)
+
+    def list_all(
+        self, offset: int, limit: int
+    ) -> tuple[list[User], int]:
+        items_stmt = (
+            select(UserORM)
+            .order_by(UserORM.id.asc())
+            .offset(offset)
+            .limit(limit)
+        )
+        count_stmt = select(func.count()).select_from(UserORM)
+        rows = self._s.exec(items_stmt).all()
+        total = self._s.exec(count_stmt).one()
+        return [to_domain(r) for r in rows], int(total)
