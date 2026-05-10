@@ -52,6 +52,26 @@ npm run test:watch
 npm run coverage  # v8 coverage report under coverage/
 ```
 
+## Tests and coverage
+
+Vitest runs in jsdom against the components and pure helpers in `src/`. From
+the repo root, use the Makefile targets so the commands run inside the
+`frontend` container:
+
+```bash
+make test-frontend       # vitest run
+make coverage-frontend   # vitest run --coverage (terminal table + coverage/)
+```
+
+`make coverage-frontend` writes the v8 report to `frontend/coverage/`. The
+suite focuses on the units with non-trivial logic — the error-code → message
+map ([src/lib/errors.ts](src/lib/errors.ts)), the ISO ↔ datetime-local helpers
+([src/lib/datetime.ts](src/lib/datetime.ts)) and the `Button` / `EventCard`
+components — so the global percentage is intentionally lower than the backend:
+**21 tests passing, ~38% lines / ~72% branches**. Pages and screen-level
+components are exercised manually against the running stack rather than by
+Vitest.
+
 ## Layout
 
 ```

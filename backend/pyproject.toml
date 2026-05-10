@@ -23,6 +23,7 @@ redis = "5.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.3.4"
+pytest-cov = "6.0.0"
 httpx = "0.28.1"
 
 [build-system]
@@ -33,3 +34,17 @@ build-backend = "poetry.core.masonry.api"
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/main.py",
+    "app/core/logging.py",
+    "alembic/*",
+    "scripts/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 1
