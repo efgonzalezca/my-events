@@ -52,6 +52,7 @@ describe('describeError', () => {
   it('covers every known backend code', () => {
     const codes = [
       'EMAIL_ALREADY_EXISTS', 'INVALID_CREDENTIALS', 'USER_NOT_FOUND',
+      'CANNOT_MODIFY_SELF',
       'EVENT_NOT_FOUND', 'EVENT_NOT_OWNED', 'EVENT_NOT_MODIFIABLE',
       'INVALID_STATUS_TRANSITION', 'CAPACITY_BELOW_REGISTERED',
       'SPEAKER_NOT_FOUND', 'SESSION_NOT_FOUND', 'SESSION_OUT_OF_EVENT_RANGE',

@@ -35,6 +35,9 @@ backend/
 │   │       └── routes/
 │   │           └── health.py            # GET /api/health
 │   ├── modules/
+│   │   ├── admin/
+│   │   │   ├── application/             # use cases + DTOs (consumes UserRepository.list_all)
+│   │   │   └── interfaces/http/         # /admin/users routes (require_role(admin) at router level)
 │   │   ├── events/
 │   │   │   ├── domain/                  # Event entity, status machine, value objects, errors
 │   │   │   ├── application/             # use cases + DTOs
@@ -199,6 +202,10 @@ The seed script aborts if the `users` table is not empty, so always run
 | POST   | `/api/events/{id}/register` | Bearer                | Register the authenticated user; 409 on `NOT_PUBLISHED`/`EVENT_FULL`/`ALREADY_REGISTERED` |
 | DELETE | `/api/events/{id}/register` | Bearer                | Cancel the authenticated user's registration; 204; 404 `REGISTRATION_NOT_FOUND` if absent |
 | GET    | `/api/me/registrations`     | Bearer                | List the authenticated user's registrations with embedded event summary       |
+| GET    | `/api/admin/users`          | Bearer (admin)        | List users with pagination (`page`, `size`)                                   |
+| GET    | `/api/admin/users/{id}`     | Bearer (admin)        | User detail; 404 `USER_NOT_FOUND` if missing                                  |
+| PATCH  | `/api/admin/users/{id}/role`   | Bearer (admin)     | Change a user's role; 409 `CANNOT_MODIFY_SELF` when targeting the caller        |
+| PATCH  | `/api/admin/users/{id}/active` | Bearer (admin)     | Activate or deactivate a user; 409 `CANNOT_MODIFY_SELF` when targeting the caller |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

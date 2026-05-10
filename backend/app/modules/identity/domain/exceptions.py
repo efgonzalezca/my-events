@@ -11,3 +11,7 @@ class InvalidCredentials(DomainError):
 
 class UserNotFound(DomainError):
     code = "USER_NOT_FOUND"
+
+
+class CannotModifySelf(DomainError):
+    code = "CANNOT_MODIFY_SELF"

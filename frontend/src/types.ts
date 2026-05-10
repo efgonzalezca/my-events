@@ -8,6 +8,10 @@ export interface User {
   is_active: boolean
 }
 
+export interface AdminUser extends User {
+  created_at: string
+}
+
 export type EventStatus = 'draft' | 'published' | 'cancelled'
 
 export interface Event {
