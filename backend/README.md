@@ -204,6 +204,8 @@ The seed script aborts if the `users` table is not empty, so always run
 | GET    | `/api/me/registrations`     | Bearer                | List the authenticated user's registrations with embedded event summary       |
 | GET    | `/api/admin/users`          | Bearer (admin)        | List users with pagination (`page`, `size`)                                   |
 | GET    | `/api/admin/users/{id}`     | Bearer (admin)        | User detail; 404 `USER_NOT_FOUND` if missing                                  |
+| PATCH  | `/api/admin/users/{id}/role`   | Bearer (admin)     | Change a user's role; 409 `CANNOT_MODIFY_SELF` when targeting the caller        |
+| PATCH  | `/api/admin/users/{id}/active` | Bearer (admin)     | Activate or deactivate a user; 409 `CANNOT_MODIFY_SELF` when targeting the caller |
 
 Interactive docs: <http://localhost:8000/api/docs>
 

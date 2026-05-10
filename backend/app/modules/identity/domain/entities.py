@@ -20,3 +20,12 @@ class User:
     role: UserRole = UserRole.attendee
     is_active: bool = True
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+    def change_role(self, role: UserRole) -> None:
+        self.role = role
+
+    def activate(self) -> None:
+        self.is_active = True
+
+    def deactivate(self) -> None:
+        self.is_active = False

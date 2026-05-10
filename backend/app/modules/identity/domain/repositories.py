@@ -13,3 +13,7 @@ class UserRepository(Protocol):
     ) -> tuple[list[User], int]:
         """Return (items, total) ordered by id ascending."""
         ...
+
+    def update(self, user: User) -> User:
+        """Persist mutable fields (role, is_active); raise UserNotFound if missing."""
+        ...

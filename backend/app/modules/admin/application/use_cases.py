@@ -2,8 +2,8 @@ from app.modules.admin.application.dtos import (
     AdminUserDTO,
     PaginatedAdminUsersDTO,
 )
-from app.modules.identity.domain.entities import User
-from app.modules.identity.domain.exceptions import UserNotFound
+from app.modules.identity.domain.entities import User, UserRole
+from app.modules.identity.domain.exceptions import CannotModifySelf, UserNotFound
 from app.modules.identity.domain.repositories import UserRepository
 
 
@@ -37,3 +37,30 @@ def get_user(user_id: int, repo: UserRepository) -> AdminUserDTO:
     if user is None:
         raise UserNotFound(str(user_id))
     return to_dto(user)
+
+
+def change_role(
+    user_id: int, role: UserRole, actor_id: int, repo: UserRepository
+) -> AdminUserDTO:
+    if user_id == actor_id:
+        raise CannotModifySelf()
+    user = repo.get_by_id(user_id)
+    if user is None:
+        raise UserNotFound(str(user_id))
+    user.change_role(role)
+    return to_dto(repo.update(user))
+
+
+def set_active(
+    user_id: int, is_active: bool, actor_id: int, repo: UserRepository
+) -> AdminUserDTO:
+    if user_id == actor_id:
+        raise CannotModifySelf()
+    user = repo.get_by_id(user_id)
+    if user is None:
+        raise UserNotFound(str(user_id))
+    if is_active:
+        user.activate()
+    else:
+        user.deactivate()
+    return to_dto(repo.update(user))

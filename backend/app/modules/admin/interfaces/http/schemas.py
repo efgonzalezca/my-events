@@ -19,3 +19,11 @@ class PaginatedAdminUsersResponse(BaseModel):
     page: int
     size: int
     total: int
+
+
+class ChangeRoleRequest(BaseModel):
+    role: UserRole
+
+
+class SetActiveRequest(BaseModel):
+    is_active: bool
