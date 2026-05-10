@@ -1,4 +1,5 @@
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.logging import configure_logging
@@ -17,6 +18,14 @@ def create_app() -> FastAPI:
     )
 
     install_error_handlers(app)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["x-request-id"],
+    )
     app.add_middleware(RequestIdMiddleware)
 
     api = APIRouter(prefix=settings.api_prefix)

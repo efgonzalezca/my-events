@@ -2,6 +2,7 @@ import os
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
 from collections.abc import Iterator
 
