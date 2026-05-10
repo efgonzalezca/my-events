@@ -10,6 +10,7 @@ Redux, no TanStack Query — just `Context` for auth and `useState` for the rest
 - React Router v7 (`BrowserRouter`)
 - Axios (with interceptors for JWT and 401 → logout)
 - Tailwind CSS v4 (`@tailwindcss/vite`)
+- Vitest + React Testing Library + jsdom for unit tests
 
 ## Environment variables
 
@@ -46,6 +47,9 @@ npm run dev       # starts Vite at http://localhost:5173
 npm run build     # type-checks and produces a prod bundle in dist/
 npm run preview   # serves dist/ locally
 npm run lint
+npm test          # runs Vitest once (use `make test-frontend` against the running stack)
+npm run test:watch
+npm run coverage  # v8 coverage report under coverage/
 ```
 
 ## Layout
@@ -62,12 +66,13 @@ src/
 ├── auth/
 │   ├── AuthContext.tsx  # provider + useAuth hook
 │   └── ProtectedRoute.tsx
-├── components/       # reusable building blocks (Button, Input, EventCard, Pager, …)
+├── components/       # reusable building blocks (Button, Input, EventCard, Pager, Toast, …)
 ├── pages/            # one screen per file
 ├── lib/
 │   ├── errors.ts        # backend code → Spanish message map
 │   ├── datetime.ts      # ISO ↔ datetime-local + es-CO formatting
 │   └── myEvents.ts      # localStorage tracker of events created in this browser
+├── test/             # vitest setup (jest-dom matchers + tsconfig)
 ├── types.ts          # interfaces mirroring the backend
 ├── App.tsx           # routes and layout
 └── main.tsx

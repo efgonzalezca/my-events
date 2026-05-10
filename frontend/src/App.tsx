@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import { Header } from './components/Header'
+import { ToastProvider } from './components/Toast'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { EventsListPage } from './pages/EventsListPage'
@@ -15,10 +16,11 @@ import { SpeakerFormPage } from './pages/SpeakerFormPage'
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <div className="min-h-screen bg-slate-50">
-          <Header />
-          <main>
+      <ToastProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-slate-50">
+            <Header />
+            <main>
             <Routes>
               <Route path="/" element={<Navigate to="/events" replace />} />
               <Route path="/login" element={<LoginPage />} />
@@ -82,8 +84,9 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-        </div>
-      </AuthProvider>
+          </div>
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   )
 }

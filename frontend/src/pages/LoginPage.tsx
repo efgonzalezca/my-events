@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+import { useToast } from '../components/Toast'
 import { describeError } from '../lib/errors'
 
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -19,6 +21,7 @@ export function LoginPage() {
     setSubmitting(true)
     try {
       await login(email, password)
+      toast.success('Sesión iniciada.')
       navigate('/events')
     } catch (err) {
       setError(describeError(err, 'No pudimos iniciar sesión.'))

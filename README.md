@@ -38,6 +38,7 @@ make status                     # ps of the stack
 make build                      # rebuild the backend
 make lock                       # regenerate poetry.lock
 make test                       # run pytest -v inside the backend
+make test-frontend              # run vitest inside the frontend container
 make migrate m="message"        # alembic autogenerate + upgrade head
 make upgrade                    # alembic upgrade head
 make downgrade                  # alembic downgrade -1

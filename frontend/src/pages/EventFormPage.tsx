@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { TextArea } from '../components/TextArea'
 import { Spinner } from '../components/Spinner'
+import { useToast } from '../components/Toast'
 import { fromLocalInput, toLocalInput } from '../lib/datetime'
 import { describeError } from '../lib/errors'
 import { trackMyEvent } from '../lib/myEvents'
@@ -14,6 +15,7 @@ export function EventFormPage() {
   const isEdit = !!id
   const eventId = id ? Number(id) : null
   const navigate = useNavigate()
+  const toast = useToast()
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -64,13 +66,17 @@ export function EventFormPage() {
         const partial: EventUpdatePayload = payload
         await eventsApi.update(eventId, partial)
         setInfo('Cambios guardados.')
+        toast.success('Cambios guardados.')
       } else {
         const created = await eventsApi.create(payload)
         trackMyEvent(created.id)
+        toast.success(`Evento "${created.name}" creado en borrador.`)
         navigate(`/events/${created.id}`)
       }
     } catch (err) {
-      setError(describeError(err, 'No pudimos guardar el evento.'))
+      const msg = describeError(err, 'No pudimos guardar el evento.')
+      setError(msg)
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }

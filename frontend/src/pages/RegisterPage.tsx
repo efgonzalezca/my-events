@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+import { useToast } from '../components/Toast'
 import { describeError } from '../lib/errors'
 
 export function RegisterPage() {
   const { register } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -20,6 +22,7 @@ export function RegisterPage() {
     setSubmitting(true)
     try {
       await register(email, password, fullName)
+      toast.success('Cuenta creada. Inicia sesión.')
       navigate('/login')
     } catch (err) {
       setError(describeError(err, 'No pudimos crear la cuenta.'))

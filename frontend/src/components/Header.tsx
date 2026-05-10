@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from './Button'
+import { useToast } from './Toast'
 
 const ROLE_LABEL: Record<string, string> = {
   admin: 'Admin',
@@ -14,6 +15,7 @@ const navItem = ({ isActive }: { isActive: boolean }) =>
 export function Header() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const canManage = !!user && (user.role === 'organizer' || user.role === 'admin')
 
   return (
@@ -38,6 +40,7 @@ export function Header() {
                 variant="ghost"
                 onClick={() => {
                   logout()
+                  toast.info('Sesión cerrada.')
                   navigate('/login')
                 }}
               >

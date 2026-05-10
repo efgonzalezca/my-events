@@ -9,6 +9,7 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { TextArea } from '../components/TextArea'
 import { Spinner } from '../components/Spinner'
+import { useToast } from '../components/Toast'
 import { untrackMyEvent } from '../lib/myEvents'
 import { describeError } from '../lib/errors'
 import { formatDateRange, fromLocalInput, toLocalInput } from '../lib/datetime'
@@ -31,6 +32,7 @@ export function EventDetailPage() {
   const eventId = Number(id)
   const navigate = useNavigate()
   const { user } = useAuth()
+  const toast = useToast()
 
   const [event, setEvent] = useState<Event | null>(null)
   const [sessions, setSessions] = useState<Session[]>([])
@@ -38,7 +40,6 @@ export function EventDetailPage() {
   const [registeredEventIds, setRegisteredEventIds] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
 
   const isOwner = !!user && !!event && (user.id === event.organizer_id || user.role === 'admin')
 
@@ -87,12 +88,16 @@ export function EventDetailPage() {
   const isRegistered = registeredEventIds.has(event.id)
   const canRegister = !!user && event.status === 'published' && !isFull && !isRegistered
 
-  const runTransition = async (fn: () => Promise<void>) => {
-    setActionError(null)
+  const runTransition = async (
+    fn: () => Promise<void>,
+    okMessage: string,
+    okKind: 'success' | 'info' = 'success',
+  ) => {
     try {
       await fn()
+      toast[okKind](okMessage)
     } catch (err) {
-      setActionError(describeError(err))
+      toast.error(describeError(err))
     }
   }
 
@@ -146,7 +151,7 @@ export function EventDetailPage() {
                 runTransition(async () => {
                   await registrationsApi.register(event.id)
                   await loadAll()
-                })
+                }, '¡Inscripción confirmada!')
               }
             >
               Inscribirme
@@ -161,7 +166,7 @@ export function EventDetailPage() {
                 runTransition(async () => {
                   await registrationsApi.cancel(event.id)
                   await loadAll()
-                })
+                }, 'Inscripción cancelada.', 'info')
               }}
             >
               Cancelar inscripción
@@ -178,7 +183,7 @@ export function EventDetailPage() {
                   runTransition(async () => {
                     const updated = await eventsApi.publish(event.id)
                     setEvent(updated)
-                  })
+                  }, 'Evento publicado: borrador → publicado.')
                 }
               >
                 Publicar
@@ -194,7 +199,7 @@ export function EventDetailPage() {
                 runTransition(async () => {
                   const updated = await eventsApi.cancel(event.id)
                   setEvent(updated)
-                })
+                }, `Evento cancelado: ${STATUS_LABEL[event.status].toLowerCase()} → cancelado.`, 'info')
               }}
             >
               Cancelar evento
@@ -206,13 +211,13 @@ export function EventDetailPage() {
               variant="ghost"
               onClick={async () => {
                 if (!confirm('¿Eliminar este evento? No se puede deshacer.')) return
-                setActionError(null)
                 try {
                   await eventsApi.remove(event.id)
                   untrackMyEvent(event.id)
+                  toast.info('Evento eliminado.')
                   navigate('/me/events')
                 } catch (err) {
-                  setActionError(describeError(err))
+                  toast.error(describeError(err))
                 }
               }}
             >
@@ -220,8 +225,6 @@ export function EventDetailPage() {
             </Button>
           )}
         </div>
-
-        {actionError && <p className="mt-3 text-sm text-red-600">{actionError}</p>}
       </div>
 
       <SessionsBlock
@@ -281,8 +284,8 @@ interface SessionItemProps {
 }
 
 function SessionItem({ session, speakers, speakerById, canManage, onRefresh }: SessionItemProps) {
+  const toast = useToast()
   const [pendingSpeakerId, setPendingSpeakerId] = useState<number | ''>('')
-  const [error, setError] = useState<string | null>(null)
 
   const linkedNames = session.speaker_ids
     .map((id) => speakerById.get(id)?.name ?? `#${id}`)
@@ -302,12 +305,12 @@ function SessionItem({ session, speakers, speakerById, canManage, onRefresh }: S
             variant="ghost"
             onClick={async () => {
               if (!confirm('¿Eliminar esta sesión?')) return
-              setError(null)
               try {
                 await sessionsApi.remove(session.id)
+                toast.info(`Sesión "${session.title}" eliminada.`)
                 onRefresh()
               } catch (err) {
-                setError(describeError(err, 'No pudimos eliminar la sesión.'))
+                toast.error(describeError(err))
               }
             }}
           >
@@ -337,13 +340,14 @@ function SessionItem({ session, speakers, speakerById, canManage, onRefresh }: S
             disabled={pendingSpeakerId === ''}
             onClick={async () => {
               if (pendingSpeakerId === '') return
-              setError(null)
+              const speaker = speakerById.get(pendingSpeakerId)
               try {
                 await sessionsApi.linkSpeaker(session.id, pendingSpeakerId)
                 setPendingSpeakerId('')
+                toast.success(`${speaker?.name ?? 'Ponente'} asignado a "${session.title}".`)
                 onRefresh()
               } catch (err) {
-                setError(describeError(err, 'No pudimos asignar el ponente.'))
+                toast.error(describeError(err))
               }
             }}
           >
@@ -357,12 +361,13 @@ function SessionItem({ session, speakers, speakerById, canManage, onRefresh }: S
                   type="button"
                   className="text-xs bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-700 px-2 py-1 rounded"
                   onClick={async () => {
-                    setError(null)
+                    const name = speakerById.get(spid)?.name ?? `#${spid}`
                     try {
                       await sessionsApi.unlinkSpeaker(session.id, spid)
+                      toast.info(`${name} retirado de "${session.title}".`)
                       onRefresh()
                     } catch (err) {
-                      setError(describeError(err, 'No pudimos quitar el ponente.'))
+                      toast.error(describeError(err))
                     }
                   }}
                 >
@@ -373,12 +378,12 @@ function SessionItem({ session, speakers, speakerById, canManage, onRefresh }: S
           )}
         </div>
       )}
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </li>
   )
 }
 
 function NewSessionForm({ event, onCreated }: { event: Event; onCreated: () => void }) {
+  const toast = useToast()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [startsAt, setStartsAt] = useState('')
@@ -412,19 +417,22 @@ function NewSessionForm({ event, onCreated }: { event: Event; onCreated: () => v
     }
     setSubmitting(true)
     try {
-      await sessionsApi.create(event.id, {
+      const created = await sessionsApi.create(event.id, {
         title,
         description,
         starts_at: fromLocalInput(startsAt),
         ends_at: fromLocalInput(endsAt),
       })
+      toast.success(`Sesión "${created.title}" creada.`)
       setTitle('')
       setDescription('')
       setStartsAt('')
       setEndsAt('')
       onCreated()
     } catch (err) {
-      setError(describeError(err, 'No pudimos crear la sesión.'))
+      const msg = describeError(err, 'No pudimos crear la sesión.')
+      setError(msg)
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }

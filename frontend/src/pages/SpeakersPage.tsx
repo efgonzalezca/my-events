@@ -6,6 +6,7 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { Pager } from '../components/Pager'
 import { Spinner } from '../components/Spinner'
+import { useToast } from '../components/Toast'
 import { describeError } from '../lib/errors'
 import type { Page, Speaker } from '../types'
 
@@ -13,11 +14,11 @@ const PAGE_SIZE = 12
 
 export function SpeakersPage() {
   const { user } = useAuth()
+  const toast = useToast()
   const canManage = !!user && (user.role === 'organizer' || user.role === 'admin')
   const [data, setData] = useState<Page<Speaker> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [activeQ, setActiveQ] = useState('')
   const [page, setPage] = useState(1)
@@ -85,7 +86,6 @@ export function SpeakersPage() {
 
       {loading && <Spinner />}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {actionError && <p className="text-sm text-red-600 mb-3">{actionError}</p>}
 
       {!loading && !error && data && (
         <>
@@ -122,12 +122,12 @@ export function SpeakersPage() {
                           className="text-xs text-red-600 hover:underline"
                           onClick={async () => {
                             if (!confirm(`¿Eliminar al ponente "${sp.name}"?`)) return
-                            setActionError(null)
                             try {
                               await speakersApi.remove(sp.id)
+                              toast.info(`Ponente "${sp.name}" eliminado.`)
                               load()
                             } catch (err) {
-                              setActionError(describeError(err, 'No pudimos eliminar el ponente.'))
+                              toast.error(describeError(err, 'No pudimos eliminar el ponente.'))
                             }
                           }}
                         >

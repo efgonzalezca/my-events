@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { TextArea } from '../components/TextArea'
 import { Spinner } from '../components/Spinner'
+import { useToast } from '../components/Toast'
 import { describeError } from '../lib/errors'
 
 export function SpeakerFormPage() {
@@ -12,6 +13,7 @@ export function SpeakerFormPage() {
   const isEdit = !!id
   const speakerId = id ? Number(id) : null
   const navigate = useNavigate()
+  const toast = useToast()
 
   const [name, setName] = useState('')
   const [bio, setBio] = useState('')
@@ -40,12 +42,16 @@ export function SpeakerFormPage() {
     try {
       if (isEdit && speakerId !== null) {
         await speakersApi.update(speakerId, { name, bio, photo_url: photoUrl })
+        toast.success(`Ponente "${name}" actualizado.`)
       } else {
-        await speakersApi.create({ name, bio, photo_url: photoUrl })
+        const created = await speakersApi.create({ name, bio, photo_url: photoUrl })
+        toast.success(`Ponente "${created.name}" creado.`)
       }
       navigate('/speakers')
     } catch (err) {
-      setError(describeError(err, 'No pudimos guardar el ponente.'))
+      const msg = describeError(err, 'No pudimos guardar el ponente.')
+      setError(msg)
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }

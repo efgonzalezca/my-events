@@ -4,6 +4,7 @@ import { registrationsApi } from '../api/registrations'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { Spinner } from '../components/Spinner'
+import { useToast } from '../components/Toast'
 import { describeError } from '../lib/errors'
 import { formatDateRange } from '../lib/datetime'
 import type { MyRegistrationItem } from '../types'
@@ -16,10 +17,10 @@ const ROLE_LABEL: Record<string, string> = {
 
 export function ProfilePage() {
   const { user } = useAuth()
+  const toast = useToast()
   const [items, setItems] = useState<MyRegistrationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -69,7 +70,6 @@ export function ProfilePage() {
       <h2 className="mt-8 text-xl font-semibold text-slate-900">Mis inscripciones</h2>
       {loading && <Spinner />}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {actionError && <p className="text-sm text-red-600 mt-2">{actionError}</p>}
       {!loading && !error && items.length === 0 && (
         <p className="text-sm text-slate-500 mt-3">
           Aún no estás inscrito a ningún evento.{' '}
@@ -94,12 +94,12 @@ export function ProfilePage() {
                 variant="ghost"
                 onClick={async () => {
                   if (!confirm('¿Cancelar tu inscripción?')) return
-                  setActionError(null)
                   try {
                     await registrationsApi.cancel(it.event.id)
+                    toast.info(`Cancelaste tu inscripción a "${it.event.name}".`)
                     await load()
                   } catch (err) {
-                    setActionError(describeError(err, 'No pudimos cancelar la inscripción.'))
+                    toast.error(describeError(err, 'No pudimos cancelar la inscripción.'))
                   }
                 }}
               >
