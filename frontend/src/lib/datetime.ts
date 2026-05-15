@@ -4,7 +4,7 @@
  * them as local time, producing a timezone-offset bug, so we append `Z` when
  * the input lacks an explicit zone marker.
  */
-function parseDate(iso: string): Date {
+export function parseDate(iso: string): Date {
   const hasTz = /(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(iso)
   return new Date(hasTz ? iso : `${iso}Z`)
 }

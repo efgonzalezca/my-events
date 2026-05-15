@@ -12,7 +12,7 @@ import { Spinner } from '../components/Spinner'
 import { useToast } from '../components/Toast'
 import { untrackMyEvent } from '../lib/myEvents'
 import { describeError } from '../lib/errors'
-import { formatDateRange, fromLocalInput, toLocalInput } from '../lib/datetime'
+import { formatDateRange, fromLocalInput, parseDate, toLocalInput } from '../lib/datetime'
 import type { Event, EventStatus, Session, Speaker } from '../types'
 
 const STATUS_LABEL: Record<EventStatus, string> = {
@@ -398,8 +398,8 @@ function NewSessionForm({ event, onCreated }: { event: Event; onCreated: () => v
     if (!startsAt || !endsAt) return null
     const sStart = new Date(startsAt).getTime()
     const sEnd = new Date(endsAt).getTime()
-    const eStart = new Date(event.starts_at).getTime()
-    const eEnd = new Date(event.ends_at).getTime()
+    const eStart = parseDate(event.starts_at).getTime()
+    const eEnd = parseDate(event.ends_at).getTime()
     if (sEnd <= sStart) return 'La hora de fin debe ser posterior a la de inicio.'
     if (sStart < eStart || sEnd > eEnd) {
       return `La sesión debe estar entre ${formatDateRange(event.starts_at, event.ends_at)}.`
